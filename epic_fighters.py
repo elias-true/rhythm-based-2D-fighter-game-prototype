@@ -246,7 +246,7 @@ while run == True:
                 player1_beat_count += 1
     if player1_beat_count == len(beats):
         player1_beat_type = 0
-    if key[pygame.K_1]:
+    if key[pygame.K_1] and beat_on == True:
         beat_on = False
         if player1_beat_type == 0:
             player1.health -= 5
@@ -255,7 +255,26 @@ while run == True:
                 if aplayer.centerx < player1.centerx + 70 and aplayer.centerx > player1.centerx - 70 and aplayer.centery < player1.centery + 40 and aplayer.centerx > player1.centerx - 40:
                     aplayer.health-=10
                     aplayer.xmom = 0
-                    aplayer.time_till_attack = 10
+        elif player1_beat_type == 2:
+            i = 0
+            for aplayer in players:
+                if aplayer.x < player1.x:
+                    i-=1
+                else:
+                    i+=1
+            if i > 0:
+                player1.xmom = 9
+            else:
+                player1.xmom = 9
+            player1.attack_moving_damage = 10
+        elif player1_beat_type == 3:
+            for aplayer in players:
+                if aplayer.centerx < player1.centerx + 70 and aplayer.centerx > player1.centerx - 70 and aplayer.centery < player1.centery + 40 and aplayer.centerx > player1.centerx - 40:
+                    aplayer.health-=20
+                    if aplayer.centerx < player1.centerx:
+                        aplayer.xmom = -6
+                    else:
+                        aplayer.xmom = 6
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
