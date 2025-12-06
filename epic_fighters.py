@@ -17,6 +17,49 @@ class beat():
         self.player = player
         pass
     rachet = True
+class projectile(pygame.Rect):
+    "these are objects that can be moved and destroyed"
+    def __init__(self,back,top,width,height,xvelocity,lifetime,origin,damage):
+        self.inittop = top
+        self.initback = back
+        self.initial_velocity = xvelocity
+        self.projectile_lifespan = lifetime
+        self.dammage = damage
+        self.spawner = origin
+        super().__init__(back,top,width,height)
+        self.tx = back
+        self.ty = top
+    
+    exists = True
+    
+    def move_ip(self,deltaX:float,deltaY:float):
+        self.tx = self.tx+deltaX
+        self.ty = self.ty+deltaY
+        selfAsRect = super()
+        selfAsRect.move_ip(round(self.tx)-selfAsRect.x,round(self.ty)-selfAsRect.y)
+#d        print("moved to "+str(self.tx)+","+str(self.ty))
+
+    def move(self,X:float,Y:float):
+        self.tx = X
+        self.ty = Y
+        selfAsRect = super()
+        selfAsRect.move(round(X),round(Y))
+
+    def resetInitialPosition(self):
+        self.tx = self.initback
+        self.ty = self.inittop
+        self.move(self.tx,self.ty)
+    def step(self):
+        self.move_ip(self.initial_velocity,0)
+        self.projectile_lifespan-=1
+        if self.projectile_lifespan < 1:
+            self.exists = False
+        for aplayer in player_list:
+            if not aplayer == self.spawner:
+                if self.colliderect(aplayer):
+                    aplayer.health -= self.dammage
+                    aplayer.xmom = self.initial_velocity
+                    self.exists = False
 class player(pygame.Rect):
     "these are objects that can be moved and destroyed"
     def __init__(self,back,top,width,height,type):
@@ -83,6 +126,7 @@ player2_beat5 = beat((200, 0, 0), 400, 2)
 player2_beat6 = beat((0, 0, 200), 430, 2)
 beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6]
 rems = []
+projectiles = []
 
 while selection < 2:
     key = pygame.key.get_pressed()
@@ -196,14 +240,16 @@ while run == True:
     beats.sort(key=lambda beat: beat.point_in_song)
     key = pygame.key.get_pressed()
     screen.fill((255,255,255))
-    for aplay in players:
+    for aplay in player_list:
         aplay.move_ip(aplay.xmom,0)
         if not aplay.attack_moving_damage == 0:
-            for aplayer in players:
+            for aplayer in player_list:
                 if not aplayer == aplay:
                     if aplay.colliderect(aplayer):
-                        aplayer.health -= aplay.attack_moving_dammage
-        if aplay.xmom < 0.2:
+                        aplayer.health -= aplay.attack_moving_damage
+                        aplay.xmom *= -0.3
+                        aplay.attack_moving_damage = 0
+        if aplay.xmom < -0.2:
             aplay.xmom+=0.1
         elif aplay.xmom > 0.2:
             aplay.xmom-=0.1
@@ -214,6 +260,15 @@ while run == True:
     pygame.draw.rect(screen, (0,200,200),player2)
     pygame.draw.rect(screen, (200,0,200),player3)
     pygame.draw.rect(screen, (200,200,200),player4)
+    for aproj in projectiles:
+        pygame.draw.rect(screen, (0,0,0), aproj)
+        if aproj.exists == False:
+            rems.append(aproj)
+        else:
+            aproj.step()
+    for arem in rems:
+        projectiles.remove(arem)
+    rems.clear()
     i = 1
     while i < (players+1):
         pygame.draw.line(screen, (0,0,0), (0,(60*i)), (3000,(60*i)), 4)
@@ -251,13 +306,48 @@ while run == True:
         if player1_beat_type == 0:
             player1.health -= 5
         elif player1_beat_type == 1:
-            for aplayer in players:
-                if aplayer.centerx < player1.centerx + 70 and aplayer.centerx > player1.centerx - 70 and aplayer.centery < player1.centery + 40 and aplayer.centerx > player1.centerx - 40:
+            for aplayer in player_list:
+                if aplayer.centerx < player1.centerx + 70 and aplayer.centerx > player1.centerx - 70 and aplayer.bottom < player1.bottom - 40:
                     aplayer.health-=10
+                    stagger(1,aplayer)
                     aplayer.xmom = 0
         elif player1_beat_type == 2:
+            print("some_attack")
+        elif player1_beat_type == 3:
+            for aplayer in player_list:
+                if aplayer.centerx < player1.centerx + 70 and aplayer.centerx > player1.centerx - 70 and aplayer.bottom < player1.bottom - 40:
+                    aplayer.health-=20
+                    if aplayer.centerx < player1.centerx:
+                        aplayer.xmom = -6
+                    else:
+                        aplayer.xmom = 6
+    elif key[pygame.K_2] and beat_on == True:
+        beat_on = False
+        if player1_beat_type == 0:
+            player1.health -= 5
+        elif player1_beat_type == 1:
+            for aplayer in player_list:
+                if aplayer.centerx < player1.centerx + 80 and aplayer.centerx > player1.centerx - 80 and aplayer.bottom < player1.bottom - 40:
+                    aplayer.health-=15
+        elif player1_beat_type == 2:
+            for aplayer in player_list:
+                if aplayer.x < player1.x:
+                    i-=1
+                else:
+                    i+=1
+            if i > 0:
+                i = 1
+            else:
+                i = -1
+            arrow = projectile(player1.x,player1.centery,30,10,3*i,400,player1,10)
+            projectiles.append(arrow)
+    elif key[pygame.K_3] and beat_on == True:
+        beat_on = False
+        if player1_beat_type == 0:
+            player1.health -= 5
+        elif player1_beat_type == 1:
             i = 0
-            for aplayer in players:
+            for aplayer in player_list:
                 if aplayer.x < player1.x:
                     i-=1
                 else:
@@ -267,14 +357,6 @@ while run == True:
             else:
                 player1.xmom = 9
             player1.attack_moving_damage = 10
-        elif player1_beat_type == 3:
-            for aplayer in players:
-                if aplayer.centerx < player1.centerx + 70 and aplayer.centerx > player1.centerx - 70 and aplayer.centery < player1.centery + 40 and aplayer.centerx > player1.centerx - 40:
-                    aplayer.health-=20
-                    if aplayer.centerx < player1.centerx:
-                        aplayer.xmom = -6
-                    else:
-                        aplayer.xmom = 6
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
