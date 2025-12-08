@@ -3,7 +3,7 @@ pygame.init()
 pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.mixer.init()
 import random
-tutorialfont = pygame.font.SysFont(None,40)
+tutorialfont = pygame.font.SysFont(None,30)
 bossfont = pygame.font.SysFont(None,70)
 titlefont = pygame.font.SysFont(None,150)
 run = True
@@ -73,9 +73,11 @@ class player(pygame.Rect):
     ymom = 0 
     xmom = 0
     health = 0
+    armour = 0
     attack_moving_damage = 0
     time_till_attck = 0
     attack_type = 0
+    lost_healt_per_miss = 5
     
     def move_ip(self,deltaX:float,deltaY:float):
         self.tx = self.tx+deltaX
@@ -100,6 +102,12 @@ def stagger(stagnum,stagplay):
     while i < stagnum:
         if beats[i].player == stagplay:
             beats[i].point_in_song += random.randint(-10,10)
+def deal_dammage(ammount,target):
+    if target.armour > 1:
+        target.armour -= ammount
+    else:
+        target.health -= ammount
+
 i = 0
 player_select_iterator = 0
 players = 2
@@ -184,7 +192,7 @@ while selection < 2:
             if key[pygame.K_RETURN] == True and dp < 1:
                 dp = 30
                 player_list[player_select_iterator].player_type = 2
-                player_list[player_select_iterator].health = 400
+                player_list[player_select_iterator].health = 420
                 player_select_iterator += 1
         if selecting == 3:
             text = bossfont.render('<circe>',True,(0,0,0),(200,200,200))
@@ -241,7 +249,7 @@ while run == True:
     key = pygame.key.get_pressed()
     screen.fill((255,255,255))
     for aplay in player_list:
-        aplay.move_ip(aplay.xmom,0)
+        aplay.move_ip(aplay.xmom,aplay.ymom)
         if not aplay.attack_moving_damage == 0:
             for aplayer in player_list:
                 if not aplayer == aplay:
@@ -256,6 +264,12 @@ while run == True:
         else:
             aplay.xmom = 0
             aplay.attack_moving_damage = 0
+        if aplay.bottom < 1500:
+            aplay.ymom+=0.2
+        else:
+            aplay.ymom = 0
+            aplay.move(aplay.x,1500 - aplay.height)
+            
     pygame.draw.rect(screen, (200,200,0),player1)
     pygame.draw.rect(screen, (0,200,200),player2)
     pygame.draw.rect(screen, (200,0,200),player3)
@@ -271,6 +285,10 @@ while run == True:
     rems.clear()
     i = 1
     while i < (players+1):
+        text = tutorialfont.render('player ' + str(i) + ' health: ' + str(player_list[i-1].health),True,(0,0,0),(255,255,255))
+        screen.blit(text,(200,(60*i)-32))
+        text = tutorialfont.render('player ' + str(i) + ' armour: ' + str(player_list[i-1].armour),True,(0,0,0),(255,255,255))
+        screen.blit(text,(400,(60*i)-32))
         pygame.draw.line(screen, (0,0,0), (0,(60*i)), (3000,(60*i)), 4)
         pygame.draw.line(screen, (0,0,0), (50,((60*i)-25)), (50,((60*i)+25)), 4)
         pygame.draw.line(screen, (0,0,0), (75,((60*i)-25)), (75,((60*i)+25)), 4)
@@ -288,9 +306,9 @@ while run == True:
             if abeat.point_in_song < 75 and abeat.point_in_song > 50:
                 if abeat.color == (200, 0, 0):
                     player1_beat_type = 1
-                elif abeat.color == (0, 200, 0):
-                    player1_beat_type = 2
                 elif abeat.color == (0, 0, 200):
+                    player1_beat_type = 2
+                elif abeat.color == (0, 200, 0):
                     player1_beat_type = 3
                 elif abeat.color == (200, 200, 0):
                     player1_beat_type = 4
@@ -299,36 +317,23 @@ while run == True:
                     abeat.rachet = False
             else:
                 player1_beat_count += 1
+    for aplayer in player_list:
+        if aplayer.armour > 0:
+            aplayer.armour -= 0.2
+        elif aplayer.armour < 0:
+            aplayer.armour = 0
     if player1_beat_count == len(beats):
         player1_beat_type = 0
     if key[pygame.K_1] and beat_on == True:
         beat_on = False
         if player1_beat_type == 0:
-            player1.health -= 5
+            player1.health -= player1.lost_healt_per_miss
         elif player1_beat_type == 1:
             for aplayer in player_list:
                 if aplayer.centerx < player1.centerx + 70 and aplayer.centerx > player1.centerx - 70 and aplayer.bottom < player1.bottom - 40:
                     aplayer.health-=10
-                    stagger(1,aplayer)
-                    aplayer.xmom = 0
-        elif player1_beat_type == 2:
-            print("some_attack")
-        elif player1_beat_type == 3:
-            for aplayer in player_list:
-                if aplayer.centerx < player1.centerx + 70 and aplayer.centerx > player1.centerx - 70 and aplayer.bottom < player1.bottom - 40:
-                    aplayer.health-=20
-                    if aplayer.centerx < player1.centerx:
-                        aplayer.xmom = -6
-                    else:
-                        aplayer.xmom = 6
-    elif key[pygame.K_2] and beat_on == True:
-        beat_on = False
-        if player1_beat_type == 0:
-            player1.health -= 5
-        elif player1_beat_type == 1:
-            for aplayer in player_list:
-                if aplayer.centerx < player1.centerx + 80 and aplayer.centerx > player1.centerx - 80 and aplayer.bottom < player1.bottom - 40:
-                    aplayer.health-=15
+                    aplayer.xmom *= -0.1
+                    aplayer.attack_moving_damage = 0
         elif player1_beat_type == 2:
             for aplayer in player_list:
                 if aplayer.x < player1.x:
@@ -341,10 +346,12 @@ while run == True:
                 i = -1
             arrow = projectile(player1.x,player1.centery,30,10,3*i,400,player1,10)
             projectiles.append(arrow)
-    elif key[pygame.K_3] and beat_on == True:
+        elif player1_beat_type == 3:
+            player1.armour = 50
+    elif key[pygame.K_2] and beat_on == True:
         beat_on = False
         if player1_beat_type == 0:
-            player1.health -= 5
+            player1.health -= player1.lost_healt_per_miss
         elif player1_beat_type == 1:
             i = 0
             for aplayer in player_list:
@@ -355,8 +362,51 @@ while run == True:
             if i > 0:
                 player1.xmom = 9
             else:
-                player1.xmom = 9
+                player1.xmom = -9
             player1.attack_moving_damage = 10
+        elif player1_beat_type == 3:
+            for aplayer in player_list:
+                if aplayer.centerx < player1.centerx + 70 and aplayer.centerx > player1.centerx - 70 and aplayer.bottom < player1.bottom - 40:
+                    aplayer.health-=20
+                    if aplayer.centerx < player1.centerx:
+                        aplayer.xmom = -6
+                    else:
+                        aplayer.xmom = 6
+    elif key[pygame.K_3] and beat_on == True:
+        beat_on = False
+        if player1_beat_type == 0:
+            player1.health -= player1.lost_healt_per_miss
+        elif player1_beat_type == 1:
+            for aplayer in player_list:
+                if aplayer.centerx < player1.centerx + 80 and aplayer.centerx > player1.centerx - 80 and aplayer.bottom < player1.bottom - 40:
+                    aplayer.health-=15
+        elif player1_beat_type == 2:
+            i = 0
+            for aplayer in player_list:
+                if aplayer.x < player1.x:
+                    i-=1
+                else:
+                    i+=1
+            if i > 0:
+                player1.xmom = 12
+            else:
+                player1.xmom = -12
+            player1.ymom = -11
+            player1.attack_moving_damage = 10
+    if key[pygame.K_4] and beat_on == True:
+        beat_on = False
+        if player1_beat_type == 0:
+            player1.health -= player1.lost_healt_per_miss
+        elif player1_beat_type == 1:
+            for aplayer in player_list:
+                if aplayer.centerx < player1.centerx + 50 and aplayer.centerx > player1.centerx - 50 and aplayer.bottom < player1.bottom - 40:
+                    aplayer.health-=10
+                    stagger(1,aplayer)
+        elif player1_beat_type == 3:
+            for aplayer in player_list:
+                if aplayer.centerx < player1.centerx + 50 and aplayer.centerx > player1.centerx - 50 and aplayer.bottom < player1.bottom - 40:
+                    aplayer.lost_healt_per_miss += 5
+                    stagger(3,aplayer)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
