@@ -85,6 +85,12 @@ class player(pygame.Rect):
     beat_count = 0
     beats = []
     beat_on = False
+    transformed = 0
+    insanity = 0
+    depravity = 1
+    heal_block = 0
+    dammage_add = [0,0]
+    stun = 0
     
     def move_ip(self,deltaX:float,deltaY:float):
         self.tx = self.tx+deltaX
@@ -109,11 +115,17 @@ def stagger(stagnum,stagplay):
     while i < stagnum:
         if beats[i].player == stagplay:
             beats[i].point_in_song += random.randint(-10,10)
+def truant(stagnum,stagplay):
+    i = 0
+    while i < stagnum:
+        i +=1
+        beats.remove(stagplay.beats[i*2])
+        stagplay.beats.remove(stagplay.beats[i*2])
 def deal_dammage(ammount,target):
     if target.armour > 1:
-        target.armour -= ammount
+        target.armour -= ammount + target.dammage_add[0]
     else:
-        target.health -= ammount
+        target.health -= ammount + target.dammage_add[0]
 
 i = 0
 player_select_iterator = 0
@@ -188,9 +200,9 @@ while selection < 2:
         screen.blit(text,(50,0))
         text = bossfont.render('odysseus',True,(0,0,0),(200,200,200))
         screen.blit(text,(100,400))
-        text = bossfont.render('poseidon',True,(0,0,0),(200,200,200))
+        text = bossfont.render('jekyll&hyde',True,(0,0,0),(200,200,200))
         screen.blit(text,(100,500))
-        text = bossfont.render('circe',True,(0,0,0),(200,200,200))
+        text = bossfont.render('greatest_showman',True,(0,0,0),(200,200,200))
         screen.blit(text,(100,600))
         if selecting == 1:
             text = bossfont.render('<odysseus>',True,(0,0,0),(200,200,200))
@@ -201,7 +213,7 @@ while selection < 2:
                 player_list[player_select_iterator].health = 350
                 player_select_iterator += 1
         if selecting == 2:
-            text = bossfont.render('<poseidon>',True,(0,0,0),(200,200,200))
+            text = bossfont.render('<jekyll&hyde>',True,(0,0,0),(200,200,200))
             screen.blit(text,(100,500))
             if key[pygame.K_RETURN] == True and dp < 1:
                 dp = 30
@@ -209,7 +221,7 @@ while selection < 2:
                 player_list[player_select_iterator].health = 420
                 player_select_iterator += 1
         if selecting == 3:
-            text = bossfont.render('<circe>',True,(0,0,0),(200,200,200))
+            text = bossfont.render('<greatest_showman>',True,(0,0,0),(200,200,200))
             screen.blit(text,(100,600))
             if key[pygame.K_RETURN] == True and dp < 1:
                 dp = 30
@@ -330,10 +342,17 @@ while run == True:
                         aplayer.beat_type = 3
                     elif abeat.color == (200, 200, 0):
                         aplayer.beat_type = 4
+                    elif abeat.color == (200, 0, 200):
+                        aplayer.beat_type = 5
                     if abeat.rachet == True:
                         aplayer.beat_on = True
                         abeat.rachet = False
                         for aplayer in player_list:
+                            aplayer.heal_block -= 1
+                            aplayer.heal_block -= 1
+                            aplayer.dammage_add[1] -= 1
+                            if aplayer.dammage_add[1] < 1:
+                                aplayer.dammage_add[0] = 0
                             if aplayer.charge_set == False:
                                 aplayer.charge = 0
                             else:
@@ -351,105 +370,182 @@ while run == True:
     if aplayer.beat_count == len(beats):
         aplayer.beat_type = 0
     for aplayer in player_list:
-        if key[aplayer.player_keybinds[0]] and aplayer.beat_on == True and aplayer.player_type == 1:
-            aplayer.beat_on = False
+        if aplayer.stun < 1:
             if aplayer.beat_type == 0:
                 aplayer.health -= aplayer.lost_healt_per_miss
-            elif aplayer.beat_type == 1:
-                for aplayer in player_list:
-                    if aplayer.centerx < aplayer.centerx + 70 and aplayer.centerx > aplayer.centerx - 70 and aplayer.bottom < aplayer.bottom - 40:
-                        aplayer.health-=10
-                        aplayer.xmom *= -0.1
-                        aplayer.attack_moving_damage = 0
-            elif aplayer.beat_type == 2:
-                for aplay in player_list:
-                    if aplay.x < aplayer.x:
-                        i-=1
-                    else:
-                        i+=1
-                if i > 0:
-                    i = 1
-                else:
-                    i = -1
-                arrow = projectile(aplayer.x,aplayer.centery,30,10,3*i,400,aplayer,10)
-                projectiles.append(arrow)
-            elif aplayer.beat_type == 3:
-                aplayer.armour = 50
-        elif key[aplayer.player_keybinds[1]] and aplayer.beat_on == True and aplayer.player_type == 1:
-            aplayer.beat_on = False
-            if aplayer.beat_type == 0:
-                aplayer.health -= aplayer.lost_healt_per_miss
-            elif aplayer.beat_type == 1:
+            if aplayer.beat_type == 5:
                 i = 0
                 for aplay in player_list:
                     if aplay.x < aplayer.x:
                         i-=1
                     else:
                         i+=1
-                if i > 0:
-                    aplayer.xmom = 9
+                if i < 0:
+                    aplayer.xmom = 8
                 else:
-                    aplayer.xmom = -9
-                aplayer.attack_moving_damage = 10
-            elif aplayer.beat_type == 2:
-                if aplayer.charge == 0:
-                    aplayer.charge = 1
-                    aplayer.charge_set = True
-                elif aplayer.charge == 1:
-                    i = 0
+                    aplayer.xmom = -8
+            if aplayer.player_type == 1 and aplayer.beat_on == True:
+                if key[aplayer.player_keybinds[0]]:
+                    aplayer.beat_on = False
+                    if aplayer.beat_type == 1:
+                        for aplayer in player_list:
+                            if aplayer.centerx < aplayer.centerx + 70 and aplayer.centerx > aplayer.centerx - 70 and aplayer.bottom < aplayer.bottom - 40:
+                                deal_dammage(10,aplay)
+                                aplayer.xmom *= -0.1
+                                aplayer.attack_moving_damage = 0
+                    elif aplayer.beat_type == 2:
+                        for aplay in player_list:
+                            if aplay.x < aplayer.x:
+                                i-=1
+                            else:
+                                i+=1
+                        if i > 0:
+                            i = 1
+                        else:
+                            i = -1
+                        arrow = projectile(aplayer.x,aplayer.centery,30,10,3*i,400,aplayer,10)
+                        projectiles.append(arrow)
+                    elif aplayer.beat_type == 3:
+                        if aplayer.heal_block < 0:
+                            aplayer.armour = 50
+                elif key[aplayer.player_keybinds[1]]:
+                    aplayer.beat_on = False
+                    if aplayer.beat_type == 1:
+                        i = 0
+                        for aplay in player_list:
+                            if aplay.x < aplayer.x:
+                                i-=1
+                            else:
+                                i+=1
+                        if i > 0:
+                            aplayer.xmom = 9
+                        else:
+                            aplayer.xmom = -9
+                        aplayer.attack_moving_damage = 10
+                    elif aplayer.beat_type == 2:
+                        if aplayer.charge == 0:
+                            aplayer.charge = 1
+                            aplayer.charge_set = True
+                        elif aplayer.charge == 1:
+                            i = 0
+                            for aplay in player_list:
+                                if aplay.x < aplayer.x:
+                                    i-=1
+                                else:
+                                    i+=1
+                            if i > 0:
+                                aplayer.xmom = 7
+                            else:
+                                aplayer.xmom = -7
+                            aplayer.attack_moving_damage = 30
+                    elif aplayer.beat_type == 3:
+                        for aplayer in player_list:
+                            if aplayer.centerx < aplayer.centerx + 70 and aplayer.centerx > aplayer.centerx - 70 and aplayer.bottom < aplayer.bottom - 40:
+                                deal_dammage(20,aplay)
+                                if aplayer.centerx < aplayer.centerx:
+                                    aplayer.xmom = -6
+                                else:
+                                    aplayer.xmom = 6
+                elif key[aplayer.player_keybinds[2]]:
+                    aplayer.beat_on = False
+                    if aplayer.beat_type == 1:
+                        for aplayer in player_list:
+                            if aplayer.centerx < aplayer.centerx + 80 and aplayer.centerx > aplayer.centerx - 80 and aplayer.bottom < aplayer.bottom - 40:
+                                deal_dammage(15,aplay)
+                    elif aplayer.beat_type == 2:
+                        i = 0
+                        for aplay in player_list:
+                            if aplay.x < aplayer.x:
+                                i-=1
+                            else:
+                                i+=1
+                        if i > 0:
+                            aplayer.xmom = 12
+                        else:
+                            aplayer.xmom = -12
+                        aplayer.ymom = -11
+                        aplayer.attack_moving_damage = 10
+                if key[aplayer.player_keybinds[3]]:
+                    aplayer.beat_on = False
+                    if aplayer.beat_type == 1:
+                        for aplay in player_list:
+                            if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
+                                deal_dammage(10,aplay)
+                                stagger(1,aplay)
+                    elif aplayer.beat_type == 3:
+                        for aplay in player_list:
+                            if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
+                                aplay.lost_healt_per_miss += 5
+                                stagger(3,aplay)
+            elif aplayer.player_type == 1 and aplayer.beat_on == True:
+                aplayer.insanity += aplayer.depravity
+                if aplayer.insanity > 30:
+                    aplayer.depravity+=1
                     for aplay in player_list:
-                        if aplay.x < aplayer.x:
-                            i-=1
+                        if aplay.centerx < aplayer.centerx + 100 and aplay.centerx > aplayer.centerx - 100 and aplay.bottom < aplayer.bottom - 70:
+                            deal_dammage(30,aplay)
+                            if aplayer.transformed == 0:
+                                aplayer.transformed = 1
+                            else:
+                                aplayer.transformed = 0
+                if key[aplayer.player_keybinds[0]]:
+                    aplayer.beat_on = False
+                    if aplayer.beat_type == 1:
+                        if aplayer.transformed == 0:
+                            if aplayer.heal_block < 0:
+                                aplayer.health += 30
+                            aplayer.beats[1].color = (200,0,200)
                         else:
-                            i+=1
-                    if i > 0:
-                        aplayer.xmom = 7
-                    else:
-                        aplayer.xmom = -7
-                    aplayer.attack_moving_damage = 30
-            elif aplayer.beat_type == 3:
-                for aplayer in player_list:
-                    if aplayer.centerx < aplayer.centerx + 70 and aplayer.centerx > aplayer.centerx - 70 and aplayer.bottom < aplayer.bottom - 40:
-                        aplayer.health-=20
-                        if aplayer.centerx < aplayer.centerx:
-                            aplayer.xmom = -6
+                            for aplay in player_list:
+                                if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
+                                    deal_dammage(10,aplay)
+                                    aplay.heal_block = 5
+                    elif aplayer.beat_type == 2:
+                        if aplayer.transformed == 0:
+                            for aplay in player_list:
+                                if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
+                                    truant(3,aplay)
                         else:
-                            aplayer.xmom = 6
-        elif key[aplayer.player_keybinds[2]] and aplayer.beat_on == True and aplayer.player_type == 1:
-            aplayer.beat_on = False
-            if aplayer.beat_type == 0:
-                aplayer.health -= aplayer.lost_healt_per_miss
-            elif aplayer.beat_type == 1:
-                for aplayer in player_list:
-                    if aplayer.centerx < aplayer.centerx + 80 and aplayer.centerx > aplayer.centerx - 80 and aplayer.bottom < aplayer.bottom - 40:
-                        aplayer.health-=15
-            elif aplayer.beat_type == 2:
-                i = 0
-                for aplay in player_list:
-                    if aplay.x < aplayer.x:
-                        i-=1
-                    else:
-                        i+=1
-                if i > 0:
-                    aplayer.xmom = 12
-                else:
-                    aplayer.xmom = -12
-                aplayer.ymom = -11
-                aplayer.attack_moving_damage = 10
-        if key[aplayer.player_keybinds[3]] and aplayer.beat_on == True and aplayer.player_type == 1:
-            aplayer.beat_on = False
-            if aplayer.beat_type == 0:
-                aplayer.health -= aplayer.lost_healt_per_miss
-            elif aplayer.beat_type == 1:
-                for aplayer in player_list:
-                    if aplayer.centerx < aplayer.centerx + 50 and aplayer.centerx > aplayer.centerx - 50 and aplayer.bottom < aplayer.bottom - 40:
-                        aplayer.health-=10
-                        stagger(1,aplayer)
-            elif aplayer.beat_type == 3:
-                for aplayer in player_list:
-                    if aplayer.centerx < aplayer.centerx + 50 and aplayer.centerx > aplayer.centerx - 50 and aplayer.bottom < aplayer.bottom - 40:
-                        aplayer.lost_healt_per_miss += 5
-                        stagger(3,aplayer)
+                            for aplay in player_list:
+                                if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
+                                    aplay.dammage_add = [10,3]
+                    elif aplayer.beat_type == 3:
+                        deal_dammage(aplayer.insanity,aplayer)
+                        for aplay in player_list:
+                            if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
+                                deal_dammage(aplayer.insanity*3,aplay)
+                                aplay.stun = aplayer.depravity
+                elif key[aplayer.player_keybinds[1]]:
+                    aplayer.beat_on = False
+                    elif aplayer.beat_type == 1:
+
+                    elif aplayer.beat_type == 2:
+
+                    elif aplayer.beat_type == 3:
+
+                elif key[aplayer.player_keybinds[2]]:
+                    aplayer.beat_on = False
+                    elif aplayer.beat_type == 1:
+
+                    elif aplayer.beat_type == 2:
+
+                if key[aplayer.player_keybinds[3]]:
+                    aplayer.beat_on = False
+                    if aplayer.beat_type ==i = 0
+                        for aplay in player_list:
+                            if aplay.x < aplayer.x:
+                                i-=1
+                            else:
+                                i+=1
+                        if i > 0:
+                            aplayer.xmom = 12
+                        else:
+                            aplayer.xmom = -12
+                        aplayer.ymom = -11
+                        aplayer.attack_moving_damage = 10 1:
+
+                    elif aplayer.beat_type == 3:
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
