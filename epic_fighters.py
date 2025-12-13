@@ -135,7 +135,7 @@ players = 2
 selection = 0
 dp = 0
 selecting = 1
-player1 = player(100,1808,64,192,None,[pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4])
+player1 = player(100,1808,64,128,None,[pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4])
 player2 = player(100,1808,64,128,None,[pygame.K_z,pygame.K_x,pygame.K_c,pygame.K_v])
 player3 = player(100,1808,64,128,None,[pygame.K_7,pygame.K_8,pygame.K_9,pygame.K_0])
 player4 = player(100,1808,64,128,None,[pygame.K_h,pygame.K_j,pygame.K_k,pygame.K_l])
@@ -286,6 +286,9 @@ for aplay in player_list:
         if aplay.player_type == 1:
             aplay.bottom = 1500
             aplay.height = 128
+        if aplay.player_type == 2:
+            aplay.bottom = 1500
+            aplay.height = 128
         elif aplay.player_type == 3:
             aplay.bottom = 1500
             aplay.height = 96
@@ -348,6 +351,9 @@ while run == True:
         screen.blit(text,(200,(60*i)-32))
         text = tutorialfont.render('player ' + str(i) + ' armour: ' + str(player_list[i-1].armour),True,(0,0,0),(255,255,255))
         screen.blit(text,(400,(60*i)-32))
+        # if player_list[i-1].beat_on == True:
+        text = tutorialfont.render(str(player_list[i-1].beat_type),True,(0,0,0),(255,255,255))
+        screen.blit(text,(700,(60*i)-32))
         pygame.draw.line(screen, (0,0,0), (0,(60*i)), (3000,(60*i)), 4)
         if player_list[i-1].beat_shown < 0:
             pygame.draw.line(screen, (0,0,0), (50,((60*i)-25)), (50,((60*i)+25)), 4)
@@ -402,12 +408,13 @@ while run == True:
                     i += 1
         if not i < len(beats):
             aplayer.beat_on = False
+            aplayer.beat_type = 0
     for aplayer in player_list:
         if aplayer.armour > 0:
             aplayer.armour -= 0.2
         elif aplayer.armour < 0:
             aplayer.armour = 0
-    if aplayer.beat_count == len(beats):
+    if aplayer.beat_count == len(aplayer.beats):
         aplayer.beat_type = 0
     for aplayer in player_list:
         if aplayer.stun < 1:
@@ -445,6 +452,7 @@ while run == True:
                                 aplayer.xmom *= -0.1
                                 aplayer.attack_moving_damage = 0
                     elif aplayer.beat_type == 2:
+                        i = 0
                         for aplay in player_list:
                             if aplay.x < aplayer.x:
                                 i-=1
@@ -528,8 +536,9 @@ while run == True:
                             if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
                                 aplay.lost_healt_per_miss += 5
                                 stagger(3,aplay)
-            elif aplayer.player_type == 1 and aplayer.beat_on == True:
+            elif aplayer.player_type == 2 and aplayer.beat_on == True:
                 aplayer.insanity += aplayer.depravity
+                print("yum")
                 if aplayer.insanity > 30:
                     aplayer.depravity+=1
                     for aplay in player_list:
@@ -539,7 +548,7 @@ while run == True:
                                 aplayer.transformed = 1
                             else:
                                 aplayer.transformed = 0
-                if key[aplayer.player_keybinds[0]]:
+                elif key[aplayer.player_keybinds[0]]:
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
                         if aplayer.transformed == 0:
@@ -573,7 +582,17 @@ while run == True:
                 elif key[aplayer.player_keybinds[1]]:
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
-                        aplayer.insanity += 2
+                        i = 0
+                        for aplay in player_list:
+                            if aplay.x < aplayer.x:
+                                i-=1
+                            else:
+                                i+=1
+                        if i > 0:
+                            aplayer.xmom = 8
+                        else:
+                            aplayer.xmom = -8
+                        aplayer.attack_moving_damage = 10
                     elif aplayer.beat_type == 2:
                         if aplayer.transformed == 0:
                             aplayer.multiply = [-1,1]
@@ -619,6 +638,16 @@ while run == True:
                             for aplayer in player_list:
                                 if aplayer.centerx < aplayer.centerx + 80 and aplayer.centerx > aplayer.centerx - 80 and aplayer.bottom < aplayer.bottom - 40:
                                     deal_dammage(15,aplay)
+                            i = 0
+                            for aplay in player_list:
+                                if aplay.x < aplayer.x:
+                                    i-=1
+                                else:
+                                    i+=1
+                            if i > 0:
+                                aplayer.xmom = 7
+                            else:
+                                aplayer.xmom = -7
                     elif aplayer.beat_type == 2:
                         if aplayer.transformed == 0:
                             deal_dammage(15,aplayer)
