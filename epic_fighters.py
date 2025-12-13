@@ -92,6 +92,7 @@ class player(pygame.Rect):
     multiply = [1,0]
     stun = 0
     healing = [0,0]
+    beat_shown = -1
     
     def move_ip(self,deltaX:float,deltaY:float):
         self.tx = self.tx+deltaX
@@ -318,8 +319,9 @@ while run == True:
         text = tutorialfont.render('player ' + str(i) + ' armour: ' + str(player_list[i-1].armour),True,(0,0,0),(255,255,255))
         screen.blit(text,(400,(60*i)-32))
         pygame.draw.line(screen, (0,0,0), (0,(60*i)), (3000,(60*i)), 4)
-        pygame.draw.line(screen, (0,0,0), (50,((60*i)-25)), (50,((60*i)+25)), 4)
-        pygame.draw.line(screen, (0,0,0), (75,((60*i)-25)), (75,((60*i)+25)), 4)
+        if player_list[i-1].beat_shown < 0:
+            pygame.draw.line(screen, (0,0,0), (50,((60*i)-25)), (50,((60*i)+25)), 4)
+            pygame.draw.line(screen, (0,0,0), (75,((60*i)-25)), (75,((60*i)+25)), 4)
         i+=1
     for abeat in beats:
         pygame.draw.circle(screen, abeat.color, (abeat.point_in_song, (abeat.player * 60)), 12)
@@ -353,6 +355,7 @@ while run == True:
                         for aplayer in player_list:
                             aplayer.heal_block -= 1
                             aplayer.heal_block -= 1
+                            aplayer.beat_shown -= 1
                             aplayer.multiply[1] -= 1
                             if aplayer.multiply[1] < 1:
                                 aplayer.multiply[0] = 1
@@ -551,25 +554,48 @@ while run == True:
                         aplayer.healing = [2,aplayer.insanity]
                 elif key[aplayer.player_keybinds[2]]:
                     aplayer.beat_on = False
-                    elif aplayer.beat_type == 1:
-
-                    elif aplayer.beat_type == 2:
-
-                if key[aplayer.player_keybinds[3]]:
-                    aplayer.beat_on = False
-                    if aplayer.beat_type ==i = 0
+                    if aplayer.beat_type == 1:
                         for aplay in player_list:
-                            if aplay.x < aplayer.x:
-                                i-=1
-                            else:
-                                i+=1
-                        if i > 0:
-                            aplayer.xmom = 12
+                            if not aplay == aplayer:
+                                if aplayer.transformed == 0:
+                                    deal_dammage(5,aplay)
+                                else:
+                                    stagger(1,aplay)
+                    elif aplayer.beat_type == 2:
+                        if aplayer.transformed == 0:
+                            for aplay in player_list:
+                                if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
+                                    aplay.beat_shown = 3
                         else:
-                            aplayer.xmom = -12
-                        aplayer.ymom = -11
-                        aplayer.attack_moving_damage = 10 1:
-
+                            for aplay in player_list:
+                                if aplay.centerx < aplayer.centerx + 70 and aplay.centerx > aplayer.centerx - 70 and aplay.bottom < aplayer.bottom - 40:
+                                    deal_dammage(10,aplay)
+                                    stagger(2,aplay)
+                    elif aplayer.beat_type == 3:
+                        if aplayer.tranformed == 0:
+                            aplayer.insanity -= 10
+                            aplayer.health += 10
+                        else:
+                            deal_dammage(5,aplayer)
+                            aplayer.insanity += 10
+                if key[aplayer.player_keybinds[3]]:
+                    if aplayer.beat_type == 1:
+                        if aplayer.transformed == 0:
+                            deal_dammage(5,aplayer)
+                            aplayer.insanity += 10
+                        else:
+                            for aplayer in player_list:
+                                if aplayer.centerx < aplayer.centerx + 80 and aplayer.centerx > aplayer.centerx - 80 and aplayer.bottom < aplayer.bottom - 40:
+                                    deal_dammage(15,aplay)
+                    elif aplayer.beat_type == 2:
+                        if aplayer.transformed == 0:
+                            deal_dammage(15,aplayer)
+                            aplayer.depravity += 1
+                        else:
+                            for aplayer in player_list:
+                                if aplayer.centerx < aplayer.centerx + 80 and aplayer.centerx > aplayer.centerx - 80 and aplayer.bottom < aplayer.bottom - 40:
+                                    aplay.health += 10
+                                    aplay.stun = 3
                     elif aplayer.beat_type == 3:
 
     for event in pygame.event.get():
