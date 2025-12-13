@@ -89,8 +89,9 @@ class player(pygame.Rect):
     insanity = 0
     depravity = 1
     heal_block = 0
-    dammage_add = [0,0]
+    multiply = [1,0]
     stun = 0
+    healing = [0,0]
     
     def move_ip(self,deltaX:float,deltaY:float):
         self.tx = self.tx+deltaX
@@ -123,9 +124,9 @@ def truant(stagnum,stagplay):
         stagplay.beats.remove(stagplay.beats[i*2])
 def deal_dammage(ammount,target):
     if target.armour > 1:
-        target.armour -= ammount + target.dammage_add[0]
+        target.armour -= ammount * target.multiply[0]
     else:
-        target.health -= ammount + target.dammage_add[0]
+        target.health -= ammount * target.multiply[0]
 
 i = 0
 player_select_iterator = 0
@@ -344,15 +345,21 @@ while run == True:
                         aplayer.beat_type = 4
                     elif abeat.color == (200, 0, 200):
                         aplayer.beat_type = 5
+                    elif abeat.color == (100, 0, 200):
+                        aplayer.beat_type = 6
                     if abeat.rachet == True:
                         aplayer.beat_on = True
                         abeat.rachet = False
                         for aplayer in player_list:
                             aplayer.heal_block -= 1
                             aplayer.heal_block -= 1
-                            aplayer.dammage_add[1] -= 1
-                            if aplayer.dammage_add[1] < 1:
-                                aplayer.dammage_add[0] = 0
+                            aplayer.multiply[1] -= 1
+                            if aplayer.multiply[1] < 1:
+                                aplayer.multiply[0] = 1
+                            aplayer.healing[1] -= 1
+                            aplayer.health += aplayer.healing[0]
+                            if aplayer.healing[1] < 1:
+                                aplayer.healing[0] = 0
                             if aplayer.charge_set == False:
                                 aplayer.charge = 0
                             else:
@@ -384,6 +391,15 @@ while run == True:
                     aplayer.xmom = 8
                 else:
                     aplayer.xmom = -8
+            if aplayer.beat_type == 6:
+                if random.randint(0,1) == 0:
+                    aplayer.xmom = 8
+                else:
+                    aplayer.xmom = -8
+                deal_dammage(5,aplayer)
+                for aplayer in player_list:
+                    if aplayer.centerx < aplayer.centerx + 100 and aplayer.centerx > aplayer.centerx - 100 and aplayer.bottom < aplayer.bottom - 100:
+                        deal_dammage(30,aplay)
             if aplayer.player_type == 1 and aplayer.beat_on == True:
                 if key[aplayer.player_keybinds[0]]:
                     aplayer.beat_on = False
@@ -508,21 +524,31 @@ while run == True:
                         else:
                             for aplay in player_list:
                                 if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
-                                    aplay.dammage_add = [10,3]
+                                    aplay.multiply = [2,3]
                     elif aplayer.beat_type == 3:
-                        deal_dammage(aplayer.insanity,aplayer)
-                        for aplay in player_list:
-                            if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
-                                deal_dammage(aplayer.insanity*3,aplay)
-                                aplay.stun = aplayer.depravity
+                        if aplayer.transformed == 0:
+                            deal_dammage(aplayer.insanity,aplayer)
+                            for aplay in player_list:
+                                if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
+                                    deal_dammage(aplayer.insanity*3,aplay)
+                                    aplay.stun = aplayer.depravity
+                        else:
+                            aplay.multiply = [1.1,2]
+                            truant(2,aplay)
                 elif key[aplayer.player_keybinds[1]]:
                     aplayer.beat_on = False
-                    elif aplayer.beat_type == 1:
-
+                    if aplayer.beat_type == 1:
+                        aplayer.insanity += 2
                     elif aplayer.beat_type == 2:
-
+                        if aplayer.transformed == 0:
+                            aplayer.multiply = [-1,1]
+                        else:
+                            aplayer.beats[0].color = (100,0,200)
+                            aplayer.beats[1].color = (100,0,200)
+                            aplayer.beats[2].color = (100,0,200)
                     elif aplayer.beat_type == 3:
-
+                        deal_dammage(aplayer.insanity,aplayer)
+                        aplayer.healing = [2,aplayer.insanity]
                 elif key[aplayer.player_keybinds[2]]:
                     aplayer.beat_on = False
                     elif aplayer.beat_type == 1:
