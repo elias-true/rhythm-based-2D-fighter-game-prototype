@@ -136,31 +136,61 @@ selection = 0
 dp = 0
 selecting = 1
 player1 = player(100,1808,64,192,None,[pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4])
-player2 = player(100,1808,64,192,None,[pygame.K_z,pygame.K_x,pygame.K_c,pygame.K_v])
-player3 = player(100,1808,64,192,None,[pygame.K_7,pygame.K_8,pygame.K_9,pygame.K_0])
-player4 = player(100,1808,64,192,None,[pygame.K_h,pygame.K_j,pygame.K_k,pygame.K_l])
+player2 = player(100,1808,64,128,None,[pygame.K_z,pygame.K_x,pygame.K_c,pygame.K_v])
+player3 = player(100,1808,64,128,None,[pygame.K_7,pygame.K_8,pygame.K_9,pygame.K_0])
+player4 = player(100,1808,64,128,None,[pygame.K_h,pygame.K_j,pygame.K_k,pygame.K_l])
 player_list = [player1,player2,player3,player4]
 player1_beat1 = beat((200, 0, 0), 150, 1)
 player1_beat2 = beat((200, 0, 0), 200, 1)
 player1_beat3 = beat((200, 0, 0), 300, 1)
 player1_beat4 = beat((0, 200, 0), 400, 1)
 player1_beat5 = beat((0, 0, 200), 430, 1)
-player1_beat6 = beat((0, 0, 200), 490, 1)
-player1_beat7 = beat((200, 0, 200), 550, 1)
+player1_beat6 = beat((200, 0, 0), 490, 1)
+player1_beat7 = beat((0, 0, 200), 550, 1)
 player1_beat8 = beat((200, 0, 0), 600, 1)
 player1_beat9 = beat((200, 0, 0), 630, 1)
 player1_beat10 = beat((0, 200, 0), 670, 1)
 player1_beat11 = beat((0, 0, 200), 700, 1)
-player1_beat12 = beat((200, 200, 0), 800, 1)
+player1_beat12 = beat((0, 200, 0), 800, 1)
+player1_beat13 = beat((200, 0, 0), 870, 1)
+player1_beat14 = beat((200, 0, 0), 910, 1)
+player1_beat15 = beat((200, 0, 0), 960, 1)
+player1_beat16 = beat((0, 200, 0), 1050, 1)
+player1_beat17 = beat((0, 0, 200), 1090, 1)
+player1_beat18 = beat((200, 0, 0), 1130, 1)
+player1_beat19 = beat((0, 0, 200), 1190, 1)
+player1_beat20 = beat((200, 0, 0), 1260, 1)
+player1_beat21 = beat((200, 0, 0), 1300, 1)
+player1_beat22 = beat((0, 200, 0), 1350, 1)
+player1_beat23 = beat((0, 0, 200), 1410, 1)
+player1_beat24 = beat((0, 200, 0), 1500, 1)
 player2_beat1 = beat((200, 0, 0), 180, 2)
 player2_beat2 = beat((0, 200, 0), 250, 2)
 player2_beat3 = beat((200, 0, 0), 300, 2)
-player2_beat4 = beat((200, 0, 0), 360, 2)
+player2_beat4 = beat((0, 0, 200), 360, 2)
 player2_beat5 = beat((200, 0, 0), 400, 2)
 player2_beat6 = beat((0, 0, 200), 430, 2)
-beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player1_beat7,player1_beat8,player1_beat9,player1_beat10,player1_beat11,player1_beat12,player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6]
-player1.beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player1_beat7,player1_beat8,player1_beat9,player1_beat10,player1_beat11,player1_beat12]
-player2.beats = [player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6]
+player2_beat7 = beat((200, 0, 0), 500, 2)
+player2_beat8 = beat((0, 200, 0), 540, 2)
+player2_beat9 = beat((200, 0, 0), 580, 2)
+player2_beat10 = beat((200, 0, 0), 650, 2)
+player2_beat11 = beat((0, 200, 0), 700, 2)
+player2_beat12 = beat((0, 0, 200), 800, 2)
+player2_beat13 = beat((200, 0, 0), 850, 2)
+player2_beat14 = beat((0, 200, 0), 920, 2)
+player2_beat15 = beat((200, 0, 0), 980, 2)
+player2_beat16 = beat((0, 0, 200), 1040, 2)
+player2_beat17 = beat((200, 0, 0), 1100, 2)
+player2_beat18 = beat((0, 0, 200), 1150, 2)
+player2_beat19 = beat((200, 0, 0), 1180, 2)
+player2_beat20 = beat((0, 200, 0), 1250, 2)
+player2_beat21 = beat((200, 0, 0), 1310, 2)
+player2_beat22 = beat((200, 0, 0), 1350, 2)
+player2_beat23 = beat((0, 200, 0), 1400, 2)
+player2_beat24 = beat((0, 0, 200), 1500, 2)
+beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player1_beat7,player1_beat8,player1_beat9,player1_beat10,player1_beat11,player1_beat12,player1_beat13,player1_beat14,player1_beat15,player1_beat16,player1_beat17,player1_beat18,player1_beat19,player1_beat20,player1_beat21,player1_beat22,player1_beat23,player1_beat24,player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6,player2_beat7,player2_beat8,player2_beat9,player2_beat10,player2_beat11,player2_beat12,player2_beat13,player2_beat14,player2_beat15,player2_beat16,player2_beat17,player2_beat18,player2_beat19,player2_beat20,player2_beat21,player2_beat22,player2_beat23,player2_beat24]
+player1.beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player1_beat7,player1_beat8,player1_beat9,player1_beat10,player1_beat11,player1_beat12,player1_beat13,player1_beat14,player1_beat15,player1_beat16,player1_beat17,player1_beat18,player1_beat19,player1_beat20,player1_beat21,player1_beat22,player1_beat23,player1_beat24]
+player2.beats = [player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6,player2_beat7,player2_beat8,player2_beat9,player2_beat10,player2_beat11,player2_beat12,player2_beat13,player2_beat14,player2_beat15,player2_beat16,player2_beat17,player2_beat18,player2_beat19,player2_beat20,player2_beat21,player2_beat22,player2_beat23,player2_beat24]
 rems = []
 projectiles = []
 
@@ -212,7 +242,7 @@ while selection < 2:
             if key[pygame.K_RETURN] == True and dp < 1:
                 dp = 30
                 player_list[player_select_iterator].player_type = 1
-                player_list[player_select_iterator].health = 350
+                player_list[player_select_iterator].health = 370
                 player_select_iterator += 1
         if selecting == 2:
             text = bossfont.render('<jekyll&hyde>',True,(0,0,0),(200,200,200))
@@ -220,7 +250,7 @@ while selection < 2:
             if key[pygame.K_RETURN] == True and dp < 1:
                 dp = 30
                 player_list[player_select_iterator].player_type = 2
-                player_list[player_select_iterator].health = 420
+                player_list[player_select_iterator].health = 400
                 player_select_iterator += 1
         if selecting == 3:
             text = bossfont.render('<greatest_showman>',True,(0,0,0),(200,200,200))
@@ -381,8 +411,10 @@ while run == True:
         aplayer.beat_type = 0
     for aplayer in player_list:
         if aplayer.stun < 1:
-            if aplayer.beat_type == 0:
-                aplayer.health -= aplayer.lost_healt_per_miss
+            for akey in aplayer.player_keybinds:
+                if key[akey]:
+                    if aplayer.beat_type == 0:
+                        aplayer.health -= aplayer.lost_healt_per_miss
             if aplayer.beat_type == 5:
                 i = 0
                 for aplay in player_list:
@@ -597,7 +629,7 @@ while run == True:
                                     aplay.health += 10
                                     aplay.stun = 3
                     elif aplayer.beat_type == 3:
-
+                        aplayer.insanity += 2
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
