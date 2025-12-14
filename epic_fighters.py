@@ -57,7 +57,7 @@ class projectile(pygame.Rect):
         for aplayer in player_list:
             if not aplayer == self.spawner:
                 if self.colliderect(aplayer):
-                    aplayer.health -= self.dammage
+                    deal_dammage(self.dammage,aplayer)
                     aplayer.xmom = self.initial_velocity
                     self.exists = False
 class player(pygame.Rect):
@@ -332,10 +332,6 @@ while run == True:
             aplay.move(aplay.x,1500 - aplay.height)
     if player2.beat_on == True:
         print("good")
-    pygame.draw.rect(screen, (200,200,0),player1)
-    pygame.draw.rect(screen, (0,200,200),player2)
-    pygame.draw.rect(screen, (200,0,200),player3)
-    pygame.draw.rect(screen, (200,200,200),player4)
     for aproj in projectiles:
         pygame.draw.rect(screen, (0,0,0), aproj)
         if aproj.exists == False:
@@ -345,6 +341,10 @@ while run == True:
     for arem in rems:
         projectiles.remove(arem)
     rems.clear()
+    pygame.draw.rect(screen, (200,200,0),player1)
+    pygame.draw.rect(screen, (0,200,200),player2)
+    pygame.draw.rect(screen, (200,0,200),player3)
+    pygame.draw.rect(screen, (200,200,200),player4)
     i = 1
     while i < (players+1):
         text = tutorialfont.render('player ' + str(i) + ' health: ' + str(player_list[i-1].health),True,(0,0,0),(255,255,255))
@@ -439,18 +439,18 @@ while run == True:
                 else:
                     aplayer.xmom = -8
                 deal_dammage(5,aplayer)
-                for aplayer in player_list:
-                    if aplayer.centerx < aplayer.centerx + 100 and aplayer.centerx > aplayer.centerx - 100 and aplayer.bottom < aplayer.bottom - 100:
-                        deal_dammage(30,aplay)
+                arrow = projectile(aplayer.centerx-100,aplayer.top-10,200,aplayer.height + 10,0,10,aplayer,30)
+                projectiles.append(arrow)
             if aplayer.player_type == 1 and aplayer.beat_on == True:
                 if key[aplayer.player_keybinds[0]]:
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
                         for aplayer in player_list:
                             if aplayer.centerx < aplayer.centerx + 70 and aplayer.centerx > aplayer.centerx - 70 and aplayer.bottom < aplayer.bottom - 40:
-                                deal_dammage(10,aplay)
                                 aplayer.xmom *= -0.1
                                 aplayer.attack_moving_damage = 0
+                        arrow = projectile(aplayer.centerx-70,aplayer.centery,140,10,0,10,aplayer,10)
+                        projectiles.append(arrow)
                     elif aplayer.beat_type == 2:
                         i = 0
                         for aplay in player_list:
@@ -500,17 +500,17 @@ while run == True:
                     elif aplayer.beat_type == 3:
                         for aplayer in player_list:
                             if aplayer.centerx < aplayer.centerx + 70 and aplayer.centerx > aplayer.centerx - 70 and aplayer.bottom < aplayer.bottom - 40:
-                                deal_dammage(20,aplay)
                                 if aplayer.centerx < aplayer.centerx:
                                     aplayer.xmom = -6
                                 else:
                                     aplayer.xmom = 6
+                        arrow = projectile(aplayer.centerx-70,aplayer.centery,140,10,0,10,aplayer,20)
+                        projectiles.append(arrow)
                 elif key[aplayer.player_keybinds[2]]:
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
-                        for aplayer in player_list:
-                            if aplayer.centerx < aplayer.centerx + 80 and aplayer.centerx > aplayer.centerx - 80 and aplayer.bottom < aplayer.bottom - 40:
-                                deal_dammage(15,aplay)
+                        arrow = projectile(aplayer.centerx-80,aplayer.centery,160,10,0,10,aplayer,15)
+                        projectiles.append(arrow)
                     elif aplayer.beat_type == 2:
                         i = 0
                         for aplay in player_list:
@@ -529,13 +529,16 @@ while run == True:
                     if aplayer.beat_type == 1:
                         for aplay in player_list:
                             if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
-                                deal_dammage(10,aplay)
                                 stagger(1,aplay)
+                        arrow = projectile(aplayer.centerx-50,aplayer.centery,100,10,0,10,aplayer,10)
+                        projectiles.append(arrow)
                     elif aplayer.beat_type == 3:
                         for aplay in player_list:
                             if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
                                 aplay.lost_healt_per_miss += 5
                                 stagger(3,aplay)
+                        arrow = projectile(aplayer.centerx-50,aplayer.centery,100,10,0,10,aplayer,0)
+                        projectiles.append(arrow)
             elif aplayer.player_type == 2 and aplayer.beat_on == True:
                 aplayer.insanity += aplayer.depravity
                 print("yum")
@@ -543,11 +546,12 @@ while run == True:
                     aplayer.depravity+=1
                     for aplay in player_list:
                         if aplay.centerx < aplayer.centerx + 100 and aplay.centerx > aplayer.centerx - 100 and aplay.bottom < aplayer.bottom - 70:
-                            deal_dammage(30,aplay)
                             if aplayer.transformed == 0:
                                 aplayer.transformed = 1
                             else:
                                 aplayer.transformed = 0
+                    arrow = projectile(aplayer.centerx-100,aplayer.top-10,200,aplayer.height + 10,0,10,aplayer,30)
+                    projectiles.append(arrow)
                 elif key[aplayer.player_keybinds[0]]:
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
@@ -558,8 +562,9 @@ while run == True:
                         else:
                             for aplay in player_list:
                                 if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
-                                    deal_dammage(10,aplay)
                                     aplay.heal_block = 5
+                            arrow = projectile(aplayer.centerx-50,aplayer.top-10,100,aplayer.height + 10,0,10,aplayer,10)
+                            projectiles.append(arrow)
                     elif aplayer.beat_type == 2:
                         if aplayer.transformed == 0:
                             for aplay in player_list:
@@ -574,8 +579,9 @@ while run == True:
                             deal_dammage(aplayer.insanity,aplayer)
                             for aplay in player_list:
                                 if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
-                                    deal_dammage(aplayer.insanity*3,aplay)
                                     aplay.stun = aplayer.depravity
+                            arrow = projectile(aplayer.centerx-50,aplayer.top-10,100,aplayer.height + 10,0,10,aplayer,aplayer.insanity*3)
+                            projectiles.append(arrow)
                         else:
                             aplay.multiply = [1.1,2]
                             truant(2,aplay)
@@ -620,8 +626,9 @@ while run == True:
                         else:
                             for aplay in player_list:
                                 if aplay.centerx < aplayer.centerx + 70 and aplay.centerx > aplayer.centerx - 70 and aplay.bottom < aplayer.bottom - 40:
-                                    deal_dammage(10,aplay)
                                     stagger(2,aplay)
+                            arrow = projectile(aplayer.centerx-70,aplayer.top-10,140,aplayer.height + 10,0,10,aplayer,10)
+                            projectiles.append(arrow)
                     elif aplayer.beat_type == 3:
                         if aplayer.tranformed == 0:
                             aplayer.insanity -= 10
@@ -638,6 +645,8 @@ while run == True:
                             for aplayer in player_list:
                                 if aplayer.centerx < aplayer.centerx + 80 and aplayer.centerx > aplayer.centerx - 80 and aplayer.bottom < aplayer.bottom - 40:
                                     deal_dammage(15,aplay)
+                            arrow = projectile(aplayer.centerx-80,aplayer.top-10,160,aplayer.height + 10,0,10,aplayer,15)
+                            projectiles.append(arrow)
                             i = 0
                             for aplay in player_list:
                                 if aplay.x < aplayer.x:
