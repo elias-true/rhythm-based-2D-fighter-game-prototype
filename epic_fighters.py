@@ -7,9 +7,37 @@ tutorialfont = pygame.font.SysFont(None,30)
 bossfont = pygame.font.SysFont(None,70)
 titlefont = pygame.font.SysFont(None,150)
 run = True
-screen = pygame.display.set_mode((3000,1500))
+screen = pygame.display.set_mode((1540,790))
 player1_beat_type = 0
 player1_beat_count = 0
+beat_ind_vel = 0
+beat_ind_vel_player2 = 0
+class movable(pygame.Rect):
+    "these are objects that can be moved and destroyed"
+    def __init__(self,back,top,width,height):
+        self.inittop = top
+        self.initback = back
+        super().__init__(back,top,width,height)
+        self.tx = back
+        self.ty = top
+    
+    def move_ip(self,deltaX:float,deltaY:float):
+        self.tx = self.tx+deltaX
+        self.ty = self.ty+deltaY
+        selfAsRect = super()
+        selfAsRect.move_ip(round(self.tx)-selfAsRect.x,round(self.ty)-selfAsRect.y)
+#d        print("moved to "+str(self.tx)+","+str(self.ty))
+
+    def move(self,X:float,Y:float):
+        self.tx = X
+        self.ty = Y
+        selfAsRect = super()
+        selfAsRect.move(round(X),round(Y))
+
+    def resetInitialPosition(self):
+        self.tx = self.initback
+        self.ty = self.inittop
+        self.move(self.tx,self.ty)
 class beat():
     def __init__(self, color, point_in_song, player):
         self.color = color
@@ -140,6 +168,10 @@ player2 = player(100,1808,64,128,None,[pygame.K_z,pygame.K_x,pygame.K_c,pygame.K
 player3 = player(100,1808,64,128,None,[pygame.K_7,pygame.K_8,pygame.K_9,pygame.K_0])
 player4 = player(100,1808,64,128,None,[pygame.K_h,pygame.K_j,pygame.K_k,pygame.K_l])
 player_list = [player1,player2,player3,player4]
+beat_indicator_bottom = movable(0,785,1550,5)
+beat_indicator_top = movable(0,0,1550,5)
+beat_indicator_left = movable(0,0,5,800)
+beat_indicator_right = movable(1535,0,5,1500)
 player1_beat1 = beat((200, 0, 0), 150, 1)
 player1_beat2 = beat((200, 0, 0), 200, 1)
 player1_beat3 = beat((200, 0, 0), 300, 1)
@@ -188,6 +220,7 @@ player2_beat21 = beat((200, 0, 0), 1310, 2)
 player2_beat22 = beat((200, 0, 0), 1350, 2)
 player2_beat23 = beat((0, 200, 0), 1400, 2)
 player2_beat24 = beat((0, 0, 200), 1500, 2)
+
 beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player1_beat7,player1_beat8,player1_beat9,player1_beat10,player1_beat11,player1_beat12,player1_beat13,player1_beat14,player1_beat15,player1_beat16,player1_beat17,player1_beat18,player1_beat19,player1_beat20,player1_beat21,player1_beat22,player1_beat23,player1_beat24,player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6,player2_beat7,player2_beat8,player2_beat9,player2_beat10,player2_beat11,player2_beat12,player2_beat13,player2_beat14,player2_beat15,player2_beat16,player2_beat17,player2_beat18,player2_beat19,player2_beat20,player2_beat21,player2_beat22,player2_beat23,player2_beat24]
 player1.beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player1_beat7,player1_beat8,player1_beat9,player1_beat10,player1_beat11,player1_beat12,player1_beat13,player1_beat14,player1_beat15,player1_beat16,player1_beat17,player1_beat18,player1_beat19,player1_beat20,player1_beat21,player1_beat22,player1_beat23,player1_beat24]
 player2.beats = [player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6,player2_beat7,player2_beat8,player2_beat9,player2_beat10,player2_beat11,player2_beat12,player2_beat13,player2_beat14,player2_beat15,player2_beat16,player2_beat17,player2_beat18,player2_beat19,player2_beat20,player2_beat21,player2_beat22,player2_beat23,player2_beat24]
@@ -345,6 +378,31 @@ while run == True:
     pygame.draw.rect(screen, (0,200,200),player2)
     pygame.draw.rect(screen, (200,0,200),player3)
     pygame.draw.rect(screen, (200,200,200),player4)
+    
+    pygame.draw.rect(screen, (200,0,0),beat_indicator_bottom)
+    pygame.draw.rect(screen, (200,0,0),beat_indicator_top)
+    pygame.draw.rect(screen, (200,0,0),beat_indicator_left)
+    pygame.draw.rect(screen, (200,0,0),beat_indicator_right)
+    beat_indicator_bottom.move_ip(0,-1*beat_ind_vel)
+    beat_indicator_bottom.height += beat_ind_vel
+    beat_indicator_right.move_ip(-1*beat_ind_vel,0)
+    beat_indicator_right.width += beat_ind_vel
+    beat_indicator_left.width += beat_ind_vel
+    beat_indicator_top.height += beat_ind_vel
+    beat_ind_vel-=0.1
+    if beat_indicator_bottom.height < 5:
+        beat_indicator_bottom.resetInitialPosition()
+        beat_indicator_right.resetInitialPosition()
+        beat_indicator_left.resetInitialPosition()
+        beat_indicator_top.resetInitialPosition()
+        beat_ind_vel = 0
+        beat_indicator_bottom.height = 5
+        beat_indicator_top.height = 5
+        beat_indicator_right.width = 5
+        beat_indicator_left.width = 5
+
+
+
     i = 1
     while i < (players+1):
         text = tutorialfont.render('player ' + str(i) + ' health: ' + str(player_list[i-1].health),True,(0,0,0),(255,255,255))
@@ -361,7 +419,7 @@ while run == True:
         i+=1
     for abeat in beats:
         pygame.draw.circle(screen, abeat.color, (abeat.point_in_song, (abeat.player * 60)), 12)
-        abeat.point_in_song -= 1
+        abeat.point_in_song -= 0.5
         if abeat.point_in_song < 30:
             rems.append(abeat)
     for arem in rems:
@@ -403,6 +461,7 @@ while run == True:
                                 aplayer.charge = 0
                             else:
                                 aplayer.charge_set == False
+                            beat_ind_vel = 2
                 else:
                     aplayer.beat_count += 1
                     i += 1
