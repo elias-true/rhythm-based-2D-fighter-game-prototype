@@ -160,9 +160,13 @@ def deal_dammage(ammount,target):
 i = 0
 player_select_iterator = 0
 players = 2
-selection = 0
+selection = -1
 dp = 0
 selecting = 1
+titlewordsize = 70
+titlewordsizechangespeed = 0
+title_word_color = (0,0,0)
+title_word_color_randomizer = 0
 player1 = player(100,1808,64,128,None,[pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4])
 player2 = player(100,1808,64,128,None,[pygame.K_z,pygame.K_x,pygame.K_c,pygame.K_v])
 player3 = player(100,1808,64,128,None,[pygame.K_7,pygame.K_8,pygame.K_9,pygame.K_0])
@@ -230,7 +234,31 @@ projectiles = []
 while selection < 2:
     key = pygame.key.get_pressed()
     screen.fill((255,255,255))
-    if selection == 0:
+    if selection == -1:
+        text = pygame.font.SysFont(None,round(titlewordsize)).render(('beat '),True,title_word_color,(255,255,255))
+        screen.blit(text,(200 - round(titlewordsize/2), 100 - round(titlewordsize/4)))
+        if titlewordsize < 100:
+            titlewordsize = 100
+            titlewordsizechangespeed = 2
+            title_word_color_randomizer = random.randint(1,4)
+            if title_word_color_randomizer == 1:
+                title_word_color = (200, 0, 0)
+            elif title_word_color_randomizer == 2:
+                title_word_color = (0, 0, 200)
+            elif title_word_color_randomizer == 3:
+                title_word_color = (0, 200, 0)
+            elif title_word_color_randomizer == 4:
+                title_word_color = (200, 200, 0)
+        titlewordsize += titlewordsizechangespeed
+        titlewordsizechangespeed -= 0.03
+        text = pygame.font.SysFont(None, 110).render('down',True,(0,0,0),(255,255,255))
+        screen.blit(text,(410,80))
+        text = bossfont.render('<play>',True,(0,0,0),(255,255,255))
+        screen.blit(text,(100,400))
+        if key[pygame.K_RETURN] == True and dp < 1:
+            dp = 30
+            selection = 0
+    elif selection == 0:
         text = titlefont.render('players',True,(0,0,0),(200,200,200))
         screen.blit(text,(50,0))
         text = bossfont.render('2',True,(0,0,0),(200,200,200))
