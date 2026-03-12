@@ -121,6 +121,7 @@ class player(pygame.Rect):
     stun = 0
     healing = [0,0]
     beat_shown = -1
+    beat_ind = False
     
     def move_ip(self,deltaX:float,deltaY:float):
         self.tx = self.tx+deltaX
@@ -361,7 +362,7 @@ for arem in rems:
 rems.clear()
 i = 0
 while i < len(player_list):
-    player_list[i].move((i*800)+100,1500-player_list[i].height)
+    player_list[i].move((i*400)+100,750-player_list[i].height)
     i += 1
 
 
@@ -386,11 +387,11 @@ while run == True:
         else:
             aplay.xmom = 0
             aplay.attack_moving_damage = 0
-        if aplay.bottom < 1500:
+        if aplay.bottom < 750:
             aplay.ymom+=0.2
         else:
             aplay.ymom = 0
-            aplay.move(aplay.x,1500 - aplay.height)
+            aplay.move(aplay.x,750 - aplay.height)
     if player2.beat_on == True:
         print("good")
     for aproj in projectiles:
@@ -430,7 +431,7 @@ while run == True:
         beat_indicator_left.width = 5
 
 
-
+    pygame.draw.line(screen, (0,0,0), (0,(750)), (3000,(750)), 4)
     i = 1
     while i < (players+1):
         text = tutorialfont.render('player ' + str(i) + ' health: ' + str(player_list[i-1].health),True,(0,0,0),(255,255,255))
@@ -442,12 +443,12 @@ while run == True:
         screen.blit(text,(700,(60*i)-32))
         pygame.draw.line(screen, (0,0,0), (0,(60*i)), (3000,(60*i)), 4)
         if player_list[i-1].beat_shown < 0:
-            pygame.draw.line(screen, (0,0,0), (50,((60*i)-25)), (50,((60*i)+25)), 4)
-            pygame.draw.line(screen, (0,0,0), (75,((60*i)-25)), (75,((60*i)+25)), 4)
+            pygame.draw.line(screen, (0,0,0), (40,((60*i)-25)), (40,((60*i)+25)), 4)
+            pygame.draw.line(screen, (0,0,0), (80,((60*i)-25)), (80,((60*i)+25)), 4)
         i+=1
     for abeat in beats:
         pygame.draw.circle(screen, abeat.color, (abeat.point_in_song, (abeat.player * 60)), 12)
-        abeat.point_in_song -= 0.5
+        abeat.point_in_song -= 0.4
         if abeat.point_in_song < 30:
             rems.append(abeat)
     for arem in rems:
@@ -458,7 +459,7 @@ while run == True:
         i = 0
         for abeat in beats:
             if abeat in aplayer.beats:
-                if abeat.point_in_song < 75 and abeat.point_in_song > 50:
+                if abeat.point_in_song < 80 and abeat.point_in_song > 40:
                     if abeat.color == (200, 0, 0):
                         aplayer.beat_type = 1
                     elif abeat.color == (0, 0, 200):
@@ -471,9 +472,14 @@ while run == True:
                         aplayer.beat_type = 5
                     elif abeat.color == (100, 0, 200):
                         aplayer.beat_type = 6
+                    if aplayer.beat_ind == True:
+                        pygame.draw.circle(screen, abeat.color, (abeat.point_in_song, (abeat.player * 60)), round(12 + (abeat.point_in_song - 50)/3))
+                        if abeat.point_in_song < 40:
+                            aplayer.beat_ind = False
                     if abeat.rachet == True:
                         aplayer.beat_on = True
                         abeat.rachet = False
+                        aplayer.beat_ind = True
                         for aplayer in player_list:
                             aplayer.heal_block -= 1
                             aplayer.heal_block -= 1
