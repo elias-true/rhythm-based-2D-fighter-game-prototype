@@ -117,11 +117,13 @@ class player(pygame.Rect):
     insanity = 0
     depravity = 1
     heal_block = 0
+    toxin = 0
     multiply = [1,0]
     stun = 0
     healing = [0,0]
     beat_shown = -1
     beat_ind = False
+    last_key_pressed = None
     
     def move_ip(self,deltaX:float,deltaY:float):
         self.tx = self.tx+deltaX
@@ -201,6 +203,30 @@ player1_beat21 = beat((200, 0, 0), 1300, 1)
 player1_beat22 = beat((0, 200, 0), 1350, 1)
 player1_beat23 = beat((0, 0, 200), 1410, 1)
 player1_beat24 = beat((0, 200, 0), 1500, 1)
+player1_beat25 = beat((200, 0, 0), 1560, 1)
+player1_beat26 = beat((200, 0, 0), 1620, 1)
+player1_beat27 = beat((200, 0, 0), 1700, 1)
+player1_beat28 = beat((0, 200, 0), 1770, 1)
+player1_beat29 = beat((0, 0, 200), 1890, 1)
+player1_beat30 = beat((200, 0, 0), 1940, 1)
+player1_beat31 = beat((0, 0, 200), 2000, 1)
+player1_beat32 = beat((200, 0, 0), 2080, 1)
+player1_beat33 = beat((200, 0, 0), 2130, 1)
+player1_beat34 = beat((0, 200, 0), 2200, 1)
+player1_beat35 = beat((0, 0, 200), 2260, 1)
+player1_beat36 = beat((0, 200, 0), 2310, 1)
+player1_beat37 = beat((200, 0, 0), 2360, 1)
+player1_beat38 = beat((200, 0, 0), 2440, 1)
+player1_beat39 = beat((200, 0, 0), 2530, 1)
+player1_beat40 = beat((0, 200, 0), 2590, 1)
+player1_beat41 = beat((0, 0, 200), 2670, 1)
+player1_beat42 = beat((200, 0, 0), 2720, 1)
+player1_beat43 = beat((0, 0, 200), 2790, 1)
+player1_beat44 = beat((200, 0, 0), 2850, 1)
+player1_beat45 = beat((200, 0, 0), 2910, 1)
+player1_beat46 = beat((0, 200, 0), 2950, 1)
+player1_beat47 = beat((0, 0, 200), 3010, 1)
+player1_beat48 = beat((0, 200, 0), 3090, 1)
 player2_beat1 = beat((200, 0, 0), 180, 2)
 player2_beat2 = beat((0, 200, 0), 250, 2)
 player2_beat3 = beat((200, 0, 0), 300, 2)
@@ -225,10 +251,34 @@ player2_beat21 = beat((200, 0, 0), 1310, 2)
 player2_beat22 = beat((200, 0, 0), 1350, 2)
 player2_beat23 = beat((0, 200, 0), 1400, 2)
 player2_beat24 = beat((0, 0, 200), 1500, 2)
+player2_beat25 = beat((200, 0, 0), 1550, 2)
+player2_beat26 = beat((200, 0, 0), 1610, 2)
+player2_beat27 = beat((200, 0, 0), 1710, 2)
+player2_beat28 = beat((0, 200, 0), 1780, 2)
+player2_beat29 = beat((0, 0, 200), 1880, 2)
+player2_beat30 = beat((200, 0, 0), 1950, 2)
+player2_beat31 = beat((0, 0, 200), 2010, 2)
+player2_beat32 = beat((200, 0, 0), 2080, 2)
+player2_beat33 = beat((200, 0, 0), 2140, 2)
+player2_beat34 = beat((0, 200, 0), 2200, 2)
+player2_beat35 = beat((0, 0, 200), 2270, 2)
+player2_beat36 = beat((0, 200, 0), 2300, 2)
+player2_beat37 = beat((200, 0, 0), 2380, 2)
+player2_beat38 = beat((200, 0, 0), 2440, 2)
+player2_beat39 = beat((200, 0, 0), 2520, 2)
+player2_beat40 = beat((0, 200, 0), 2570, 2)
+player2_beat41 = beat((0, 0, 200), 2660, 2)
+player2_beat42 = beat((200, 0, 0), 2720, 2)
+player2_beat43 = beat((0, 0, 200), 2800, 2)
+player2_beat44 = beat((200, 0, 0), 2860, 2)
+player2_beat45 = beat((200, 0, 0), 2930, 2)
+player2_beat46 = beat((0, 200, 0), 2995, 2)
+player2_beat47 = beat((0, 0, 200), 3100, 2)
+player2_beat48 = beat((0, 200, 0), 3170, 2)
 
-beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player1_beat7,player1_beat8,player1_beat9,player1_beat10,player1_beat11,player1_beat12,player1_beat13,player1_beat14,player1_beat15,player1_beat16,player1_beat17,player1_beat18,player1_beat19,player1_beat20,player1_beat21,player1_beat22,player1_beat23,player1_beat24,player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6,player2_beat7,player2_beat8,player2_beat9,player2_beat10,player2_beat11,player2_beat12,player2_beat13,player2_beat14,player2_beat15,player2_beat16,player2_beat17,player2_beat18,player2_beat19,player2_beat20,player2_beat21,player2_beat22,player2_beat23,player2_beat24]
-player1.beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player1_beat7,player1_beat8,player1_beat9,player1_beat10,player1_beat11,player1_beat12,player1_beat13,player1_beat14,player1_beat15,player1_beat16,player1_beat17,player1_beat18,player1_beat19,player1_beat20,player1_beat21,player1_beat22,player1_beat23,player1_beat24]
-player2.beats = [player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6,player2_beat7,player2_beat8,player2_beat9,player2_beat10,player2_beat11,player2_beat12,player2_beat13,player2_beat14,player2_beat15,player2_beat16,player2_beat17,player2_beat18,player2_beat19,player2_beat20,player2_beat21,player2_beat22,player2_beat23,player2_beat24]
+beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player1_beat7,player1_beat8,player1_beat9,player1_beat10,player1_beat11,player1_beat12,player1_beat13,player1_beat14,player1_beat15,player1_beat16,player1_beat17,player1_beat18,player1_beat19,player1_beat20,player1_beat21,player1_beat22,player1_beat23,player1_beat24,player1_beat25,player1_beat26,player1_beat27,player1_beat28,player1_beat29,player1_beat30,player1_beat31,player1_beat32,player1_beat33,player1_beat34,player1_beat35,player1_beat36,player1_beat37,player1_beat38,player1_beat39,player1_beat40,player1_beat41,player1_beat42,player1_beat43,player1_beat44,player1_beat45,player1_beat46,player1_beat47,player1_beat48,player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6,player2_beat7,player2_beat8,player2_beat9,player2_beat10,player2_beat11,player2_beat12,player2_beat13,player2_beat14,player2_beat15,player2_beat16,player2_beat17,player2_beat18,player2_beat19,player2_beat20,player2_beat21,player2_beat22,player2_beat23,player2_beat24,player2_beat25,player2_beat26,player2_beat27,player2_beat28,player2_beat29,player2_beat30,player2_beat31,player2_beat32,player2_beat33,player2_beat34,player2_beat36,player2_beat36,player2_beat37,player2_beat38,player2_beat39,player2_beat40,player2_beat41,player2_beat42,player2_beat43,player2_beat44,player2_beat45,player2_beat46,player2_beat47,player2_beat48]
+player1.beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1_beat5,player1_beat6,player1_beat7,player1_beat8,player1_beat9,player1_beat10,player1_beat11,player1_beat12,player1_beat13,player1_beat14,player1_beat15,player1_beat16,player1_beat17,player1_beat18,player1_beat19,player1_beat20,player1_beat21,player1_beat22,player1_beat23,player1_beat24,player1_beat25,player1_beat26,player1_beat27,player1_beat28,player1_beat29,player1_beat30,player1_beat31,player1_beat32,player1_beat33,player1_beat34,player1_beat35,player1_beat36,player1_beat37,player1_beat38,player1_beat39,player1_beat40,player1_beat41,player1_beat42,player1_beat43,player1_beat44,player1_beat45,player1_beat46,player1_beat47,player1_beat48]
+player2.beats = [player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6,player2_beat7,player2_beat8,player2_beat9,player2_beat10,player2_beat11,player2_beat12,player2_beat13,player2_beat14,player2_beat15,player2_beat16,player2_beat17,player2_beat18,player2_beat19,player2_beat20,player2_beat21,player2_beat22,player2_beat23,player2_beat24,player2_beat25,player2_beat26,player2_beat27,player2_beat28,player2_beat29,player2_beat30,player2_beat31,player2_beat32,player2_beat33,player2_beat34,player2_beat36,player2_beat36,player2_beat37,player2_beat38,player2_beat39,player2_beat40,player2_beat41,player2_beat42,player2_beat43,player2_beat44,player2_beat45,player2_beat46,player2_beat47,player2_beat48]
 rems = []
 projectiles = []
 
@@ -484,6 +534,7 @@ while run == True:
                             aplayer.heal_block -= 1
                             aplayer.heal_block -= 1
                             aplayer.beat_shown -= 1
+                            aplayer.health -= aplayer.toxin
                             aplayer.multiply[1] -= 1
                             if aplayer.multiply[1] < 1:
                                 aplayer.multiply[0] = 1
@@ -536,6 +587,7 @@ while run == True:
                 projectiles.append(arrow)
             if aplayer.player_type == 1 and aplayer.beat_on == True:
                 if key[aplayer.player_keybinds[0]]:
+                    aplayer.last_key_pressed = 0
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
                         for aplayer in player_list:
@@ -561,6 +613,7 @@ while run == True:
                         if aplayer.heal_block < 0:
                             aplayer.armour = 50
                 elif key[aplayer.player_keybinds[1]]:
+                    aplayer.last_key_pressed = 1
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
                         i = 0
@@ -575,6 +628,7 @@ while run == True:
                             aplayer.xmom = -9
                         aplayer.attack_moving_damage = 10
                     elif aplayer.beat_type == 2:
+                        aplayer.beats[1].color = (0,0,200)
                         if aplayer.charge == 0:
                             aplayer.charge = 1
                             aplayer.charge_set = True
@@ -600,6 +654,7 @@ while run == True:
                         arrow = projectile(aplayer.centerx-70,aplayer.centery,140,10,0,10,aplayer,20)
                         projectiles.append(arrow)
                 elif key[aplayer.player_keybinds[2]]:
+                    aplayer.last_key_pressed = 2
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
                         arrow = projectile(aplayer.centerx-80,aplayer.centery,160,10,0,10,aplayer,15)
@@ -617,13 +672,23 @@ while run == True:
                             aplayer.xmom = -12
                         aplayer.ymom = -11
                         aplayer.attack_moving_damage = 10
+                    elif aplayer.beat_type == 3:
+                        for aplay in player_list:
+                            if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
+                                aplay.toxin += 3
+                        arrow = projectile(aplayer.centerx-50,aplayer.centery,100,10,0,10,aplayer,0)
+                        projectiles.append(arrow)
                 if key[aplayer.player_keybinds[3]]:
+                    aplayer.last_key_pressed = 3
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
                         for aplay in player_list:
                             if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
                                 stagger(1,aplay)
                         arrow = projectile(aplayer.centerx-50,aplayer.centery,100,10,0,10,aplayer,10)
+                        projectiles.append(arrow)
+                    elif aplayer.beat_type == 2:
+                        arrow = projectile(aplayer.centerx-10,aplayer.centery,20,10,random.randint(-1,1),200,aplayer,50)
                         projectiles.append(arrow)
                     elif aplayer.beat_type == 3:
                         for aplay in player_list:
