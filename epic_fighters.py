@@ -686,10 +686,10 @@ while run == True:
                     aplayer.last_key_pressed = 0
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
-                        for aplayer in player_list:
-                            if aplayer.centerx < aplayer.centerx + 70 and aplayer.centerx > aplayer.centerx - 70 and aplayer.bottom < aplayer.bottom - 40:
-                                aplayer.xmom *= -0.1
-                                aplayer.attack_moving_damage = 0
+                        for aplay in player_list:
+                            if aplayer.centerx < aplay.centerx + 70 and aplayer.centerx > aplay.centerx - 70 and aplayer.bottom < aplay.bottom - 40:
+                                aplay.xmom *= -0.1
+                                aplay.attack_moving_damage = 0
                         arrow = projectile(aplayer.centerx-70,aplayer.centery,140,10,0,10,aplayer,10)
                         projectiles.append(arrow)
                     elif aplayer.beat_type == 2:
@@ -703,7 +703,7 @@ while run == True:
                             i = 1
                         else:
                             i = -1
-                        arrow = projectile(aplayer.x,aplayer.centery,30,10,3*i,400,aplayer,10)
+                        arrow = projectile(aplayer.centerx,aplayer.centery,30,10,3*i,400,aplayer,10)
                         projectiles.append(arrow)
                     elif aplayer.beat_type == 3:
                         if aplayer.heal_block < 0:
