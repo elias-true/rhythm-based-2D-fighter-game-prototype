@@ -170,6 +170,7 @@ titlewordsize = 70
 titlewordsizechangespeed = 0
 title_word_color = (0,0,0)
 title_word_color_randomizer = 0
+beatspassedplayer1 = 0
 player1 = player(100,1808,64,128,None,[pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4])
 player2 = player(100,1808,64,128,None,[pygame.K_z,pygame.K_x,pygame.K_c,pygame.K_v])
 player3 = player(100,1808,64,128,None,[pygame.K_7,pygame.K_8,pygame.K_9,pygame.K_0])
@@ -584,6 +585,8 @@ while run == True:
 
 
     pygame.draw.line(screen, (0,0,0), (0,(750)), (3000,(750)), 4)
+    text = tutorialfont.render(str(beatspassedplayer1),True,(0,0,0),(255,255,255))
+    screen.blit(text,(700,500))
     i = 1
     while i < (players+1):
         text = tutorialfont.render('player ' + str(i) + ' health: ' + str(player_list[i-1].health),True,(0,0,0),(255,255,255))
@@ -607,10 +610,10 @@ while run == True:
         beats.remove(arem)
     rems.clear()
     for aplayer in player_list:
-        aplayer.beat_count = 0
+        aplayer.beat_count = len(aplayer.beats)
         i = 0
-        for abeat in beats:
-            if abeat in aplayer.beats:
+        for abeat in aplayer.beats:
+            # if abeat in aplayer.beats:
                 if abeat.point_in_song < 80 and abeat.point_in_song > 40:
                     if abeat.color == (200, 0, 0):
                         aplayer.beat_type = 1
@@ -632,6 +635,8 @@ while run == True:
                         aplayer.beat_on = True
                         abeat.rachet = False
                         aplayer.beat_ind = True
+                        if abeat in player1.beats:
+                            beatspassedplayer1 += 1
                         for aplayer in player_list:
                             aplayer.heal_block -= 1
                             aplayer.heal_block -= 1
@@ -650,9 +655,11 @@ while run == True:
                                 aplayer.charge_set == False
                             beat_ind_vel = 2
                 else:
-                    aplayer.beat_count += 1
+                    aplayer.beat_count -= 1
                     i += 1
-        if not i < len(beats):
+        if aplayer.beat_count <= 0:
+            aplayer.beat_type = 0
+        if not i < len(aplayer.beats):
             aplayer.beat_on = False
             aplayer.beat_type = 0
     for aplayer in player_list:
@@ -660,8 +667,8 @@ while run == True:
             aplayer.armour -= 0.2
         elif aplayer.armour < 0:
             aplayer.armour = 0
-    if aplayer.beat_count == len(aplayer.beats):
-        aplayer.beat_type = 0
+    # if aplayer.beat_count == len(aplayer.beats):
+    #     aplayer.beat_type = 0
     for aplayer in player_list:
         if aplayer.stun < 1:
             for akey in aplayer.player_keybinds:
