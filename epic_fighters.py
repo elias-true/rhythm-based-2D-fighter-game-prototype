@@ -403,7 +403,7 @@ while selection < 2:
         text = bossfont.render('<play>',True,(0,0,0),(255,255,255))
         screen.blit(text,(100,400))
         if key[pygame.K_RETURN] == True and dp < 1:
-            dp = 30
+            dp = 70
             selection = 0
     elif selection == 0:
         text = titlefont.render('players',True,(0,0,0),(200,200,200))
@@ -418,21 +418,21 @@ while selection < 2:
             text = bossfont.render('<2>',True,(0,0,0),(200,200,200))
             screen.blit(text,(100,400))
             if key[pygame.K_RETURN] == True and dp < 1:
-                dp = 30
+                dp = 70
                 players = 2
                 selection = 1
         if selecting == 2:
             text = bossfont.render('<3>',True,(0,0,0),(200,200,200))
             screen.blit(text,(100,500))
             if key[pygame.K_RETURN] == True and dp < 1:
-                dp = 30
+                dp = 70
                 players = 3
                 selection = 1
         if selecting == 3:
             text = bossfont.render('<4>',True,(0,0,0),(200,200,200))
             screen.blit(text,(100,600))
             if key[pygame.K_RETURN] == True and dp < 1:
-                dp = 30
+                dp = 70
                 players = 4
                 selection = 1
     elif selection == 1:
@@ -448,7 +448,7 @@ while selection < 2:
             text = bossfont.render('<odysseus>',True,(0,0,0),(200,200,200))
             screen.blit(text,(100,400))
             if key[pygame.K_RETURN] == True and dp < 1:
-                dp = 30
+                dp = 70
                 player_list[player_select_iterator].player_type = 1
                 player_list[player_select_iterator].health = 370
                 player_select_iterator += 1
@@ -456,7 +456,7 @@ while selection < 2:
             text = bossfont.render('<jekyll&hyde>',True,(0,0,0),(200,200,200))
             screen.blit(text,(100,500))
             if key[pygame.K_RETURN] == True and dp < 1:
-                dp = 30
+                dp = 70
                 player_list[player_select_iterator].player_type = 2
                 player_list[player_select_iterator].health = 400
                 player_select_iterator += 1
@@ -464,7 +464,7 @@ while selection < 2:
             text = bossfont.render('<greatest_showman>',True,(0,0,0),(200,200,200))
             screen.blit(text,(100,600))
             if key[pygame.K_RETURN] == True and dp < 1:
-                dp = 30
+                dp = 70
                 player_list[player_select_iterator].player_type = 3
                 player_list[player_select_iterator].health = 300
                 player_select_iterator += 1
@@ -474,12 +474,12 @@ while selection < 2:
         selecting+=1
         if selecting>3:
             selecting = 1
-        dp = 30
+        dp = 50
     elif key[pygame.K_UP] == True and dp < 1:
         selecting-=1
         if selecting<1:
             selecting = 3
-        dp = 30
+        dp = 50
     else:
         dp-=1
     for event in pygame.event.get():
@@ -538,6 +538,12 @@ while run == True:
         else:
             aplay.ymom = 0
             aplay.move(aplay.x,750 - aplay.height)
+        if aplay.left < 0:
+            aplay.xmom *= -1
+            aplay.move(0,aplay.y)
+        if aplay.right > 1540:
+            aplay.xmom *= -1
+            aplay.move(1540 - aplay.width,aplay.y)
     if player2.beat_on == True:
         print("good")
     for aproj in projectiles:
