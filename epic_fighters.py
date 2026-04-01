@@ -3,6 +3,7 @@ pygame.init()
 pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.mixer.init()
 import random
+import time as timekeep
 tutorialfont = pygame.font.SysFont(None,30)
 bossfont = pygame.font.SysFont(None,70)
 titlefont = pygame.font.SysFont(None,150)
@@ -12,6 +13,19 @@ player1_beat_type = 0
 player1_beat_count = 0
 beat_ind_vel = 0
 beat_ind_vel_player2 = 0
+
+current_time = 1
+last_second_time = timekeep.time()
+tick_multiplier_debug = 1
+ticks = 1
+timestep = False
+ticks1 = 1
+tps = 1
+last_second_time1 = 1
+numberkey = 0
+
+
+
 class movable(pygame.Rect):
     "these are objects that can be moved and destroyed"
     def __init__(self,back,top,width,height):
@@ -78,17 +92,17 @@ class projectile(pygame.Rect):
         self.ty = self.inittop
         self.move(self.tx,self.ty)
     def step(self):
-        self.move_ip(self.initial_velocity,0)
+        self.move_ip(self.initial_velocity*tick_multiplier_debug,0)
         self.projectile_lifespan-=1
         if self.projectile_lifespan < 1:
             self.exists = False
-        for aplayer in player_list:
+        for aplayer in hitables:
             if not aplayer == self.spawner:
                 if self.colliderect(aplayer):
                     deal_dammage(self.dammage,aplayer)
                     aplayer.xmom = self.initial_velocity
                     self.exists = False
-class player(pygame.Rect):
+class player(movable):
     "these are objects that can be moved and destroyed"
     def __init__(self,back,top,width,height,type,keys):
         self.inittop = top
@@ -125,23 +139,23 @@ class player(pygame.Rect):
     beat_ind = False
     last_key_pressed = None
     
-    def move_ip(self,deltaX:float,deltaY:float):
-        self.tx = self.tx+deltaX
-        self.ty = self.ty+deltaY
-        selfAsRect = super()
-        selfAsRect.move_ip(round(self.tx)-selfAsRect.x,round(self.ty)-selfAsRect.y)
-#d        print("moved to "+str(self.tx)+","+str(self.ty))
+    # def move_ip(self,deltaX:float,deltaY:float):
+#         self.tx = self.tx+deltaX
+#         self.ty = self.ty+deltaY
+#         selfAsRect = super()
+#         selfAsRect.move_ip(round(self.tx)-selfAsRect.x,round(self.ty)-selfAsRect.y)
+# #d        print("moved to "+str(self.tx)+","+str(self.ty))
 
-    def move(self,X:float,Y:float):
-        self.tx = X
-        self.ty = Y
-        selfAsRect = super()
-        selfAsRect.move(round(X),round(Y))
+#     def move(self,X:float,Y:float):
+#         self.tx = X
+#         self.ty = Y
+#         selfAsRect = super()
+#         selfAsRect.move(round(X),round(Y))
 
-    def resetInitialPosition(self):
-        self.tx = self.initback
-        self.ty = self.inittop
-        self.move(self.tx,self.ty)
+#     def resetInitialPosition(self):
+#         self.tx = self.initback
+#         self.ty = self.inittop
+#         self.move(self.tx,self.ty)
 
 def stagger(stagnum,stagplay):
     i = 0
@@ -159,6 +173,22 @@ def deal_dammage(ammount,target):
         target.armour -= ammount * target.multiply[0]
     else:
         target.health -= ammount * target.multiply[0]
+
+class summon(movable):
+    "these are objects that can be moved and destroyed"
+    def __init__(self,back,top,width,height,health,damage,time_between_hits,ranged,attack_duration):
+        self.inittop = top
+        self.initback = back
+        self.health = health
+        self.damage = damage
+        self.time_between_hits = time_between_hits
+        self.ranged = ranged
+        self.attack_duration = attack_duration
+        super().__init__(back,top,width,height)
+        self.tx = back
+        self.ty = top
+    abylity_type = 0
+    armour = 0
 
 i = 0
 player_select_iterator = 0
@@ -378,10 +408,33 @@ player1.beats = [player1_beat1,player1_beat2,player1_beat3,player1_beat4,player1
 player2.beats = [player2_beat1,player2_beat2,player2_beat3,player2_beat4,player2_beat5,player2_beat6,player2_beat7,player2_beat8,player2_beat9,player2_beat10,player2_beat11,player2_beat12,player2_beat13,player2_beat14,player2_beat15,player2_beat16,player2_beat17,player2_beat18,player2_beat19,player2_beat20,player2_beat21,player2_beat22,player2_beat23,player2_beat24,player2_beat25,player2_beat26,player2_beat27,player2_beat28,player2_beat29,player2_beat30,player2_beat31,player2_beat32,player2_beat33,player2_beat34,player2_beat36,player2_beat36,player2_beat37,player2_beat38,player2_beat39,player2_beat40,player2_beat41,player2_beat42,player2_beat43,player2_beat44,player2_beat45,player2_beat46,player2_beat47,player2_beat48,player2_beat49,player2_beat50,player2_beat51,player2_beat52,player2_beat53,player2_beat54,player2_beat55,player2_beat56,player2_beat57,player2_beat58,player2_beat59,player2_beat60,player2_beat61,player2_beat62,player2_beat63,player2_beat64,player2_beat65,player2_beat66,player2_beat67,player2_beat68,player2_beat69,player2_beat70,player2_beat71,player2_beat72,player2_beat73,player2_beat74,player2_beat75,player2_beat76,player2_beat77,player2_beat78,player2_beat79,player2_beat80,player2_beat81,player2_beat82,player2_beat83,player2_beat84,player2_beat85,player2_beat86,player2_beat87,player2_beat88,player2_beat89,player2_beat90,player2_beat91,player2_beat92,player2_beat93,player2_beat94,player2_beat95,player2_beat96]
 rems = []
 projectiles = []
+summons = []
+hitables = []
 
 while selection < 2:
+    current_time = timekeep.time()
+    if current_time - last_second_time >= 0.005:
+        tick_multiplier_debug = 200/(ticks/(current_time - last_second_time))
+        #tick_multiplier_debug = #50/(ticks/(current_time - last_second_time))
+        timestep = True
+        ticks = 0
+        numberkey = current_time - last_second_time
+        last_second_time = current_time
+
+    else:
+        timestep = False
+    ticks+=1
+    ticks1+=1
+    if current_time - last_second_time1 >= 1:
+        tps = ticks1/(current_time - last_second_time1)
+        # tick_multiplier_debug = 50/(ticks1/(current_time - last_second_time1))
+        
+        ticks1 = 0
+        last_second_time1 = current_time
     key = pygame.key.get_pressed()
     screen.fill((255,255,255))
+    text = bossfont.render('tps ' + str(round(tps)),True,(0,0,0),(200,200,200))
+    screen.blit(text,(50,200))
     if selection == -1:
         text = pygame.font.SysFont(None,round(titlewordsize)).render(('beat '),True,title_word_color,(255,255,255))
         screen.blit(text,(200 - round(titlewordsize/2), 100 - round(titlewordsize/4)))
@@ -397,8 +450,8 @@ while selection < 2:
                 title_word_color = (0, 200, 0)
             elif title_word_color_randomizer == 4:
                 title_word_color = (200, 200, 0)
-        titlewordsize += titlewordsizechangespeed
-        titlewordsizechangespeed -= 0.03
+        titlewordsize += titlewordsizechangespeed*tick_multiplier_debug
+        titlewordsizechangespeed -= 0.03*tick_multiplier_debug
         text = pygame.font.SysFont(None, 110).render('down',True,(0,0,0),(255,255,255))
         screen.blit(text,(410,80))
         text = bossfont.render('<play>',True,(0,0,0),(255,255,255))
@@ -482,12 +535,13 @@ while selection < 2:
             selecting = 3
         dp = 50
     else:
-        dp-=1
+        dp-=1*tick_multiplier_debug
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
             selection = 3
-    pygame.display.update()
+    if timestep == True:
+        pygame.display.update()
     
 
 for aplay in player_list:
@@ -515,11 +569,30 @@ while i < len(player_list):
 
 
 while run == True:
+    current_time = timekeep.time()
+    if current_time - last_second_time >= 0.02:
+        tick_multiplier_debug = 300/(ticks/(current_time - last_second_time))
+        #tick_multiplier_debug = #50/(ticks/(current_time - last_second_time))
+        timestep = True
+        ticks = 0
+        last_second_time = current_time
+
+    else:
+        timestep = False
+    ticks+=1
+    ticks1+=1
+    if current_time - last_second_time1 >= 1:
+        tps = ticks1/(current_time - last_second_time1)
+        # tick_multiplier_debug = 50/(ticks1/(current_time - last_second_time1))
+        
+        ticks1 = 0
+        last_second_time1 = current_time
+    hitables = player_list + summons
     beats.sort(key=lambda beat: beat.point_in_song)
     key = pygame.key.get_pressed()
     screen.fill((255,255,255))
     for aplay in player_list:
-        aplay.move_ip(aplay.xmom,aplay.ymom)
+        aplay.move_ip(aplay.xmom*tick_multiplier_debug,aplay.ymom*tick_multiplier_debug)
         if not aplay.attack_moving_damage == 0:
             for aplayer in player_list:
                 if not aplayer == aplay:
@@ -527,15 +600,15 @@ while run == True:
                         aplayer.health -= aplay.attack_moving_damage
                         aplay.xmom *= -0.3
                         aplay.attack_moving_damage = 0
-        if aplay.xmom < -0.2:
-            aplay.xmom+=0.1
-        elif aplay.xmom > 0.2:
-            aplay.xmom-=0.1
+        if aplay.xmom < -0.2*tick_multiplier_debug:
+            aplay.xmom+=0.1*tick_multiplier_debug
+        elif aplay.xmom > 0.2*tick_multiplier_debug:
+            aplay.xmom-=0.1*tick_multiplier_debug
         else:
             aplay.xmom = 0
             aplay.attack_moving_damage = 0
         if aplay.bottom < 750:
-            aplay.ymom+=0.2
+            aplay.ymom+=0.2*tick_multiplier_debug
         else:
             aplay.ymom = 0
             aplay.move(aplay.x,750 - aplay.height)
@@ -565,13 +638,13 @@ while run == True:
     pygame.draw.rect(screen, (200,0,0),beat_indicator_top)
     pygame.draw.rect(screen, (200,0,0),beat_indicator_left)
     pygame.draw.rect(screen, (200,0,0),beat_indicator_right)
-    beat_indicator_bottom.move_ip(0,-1*beat_ind_vel)
-    beat_indicator_bottom.height += beat_ind_vel
-    beat_indicator_right.move_ip(-1*beat_ind_vel,0)
-    beat_indicator_right.width += beat_ind_vel
-    beat_indicator_left.width += beat_ind_vel
-    beat_indicator_top.height += beat_ind_vel
-    beat_ind_vel-=0.1
+    beat_indicator_bottom.move_ip(0,-1*beat_ind_vel*tick_multiplier_debug)
+    beat_indicator_bottom.height = 790 - beat_indicator_bottom.y
+    beat_indicator_right.move_ip(-1*beat_ind_vel*tick_multiplier_debug,0)
+    beat_indicator_right.width = 1540 - beat_indicator_right.x
+    beat_indicator_left.width += beat_ind_vel*tick_multiplier_debug
+    beat_indicator_top.height += beat_ind_vel*tick_multiplier_debug
+    beat_ind_vel-=0.1*tick_multiplier_debug
     if beat_indicator_bottom.height < 5:
         beat_indicator_bottom.resetInitialPosition()
         beat_indicator_right.resetInitialPosition()
@@ -603,7 +676,7 @@ while run == True:
         i+=1
     for abeat in beats:
         pygame.draw.circle(screen, abeat.color, (abeat.point_in_song, (abeat.player * 60)), 12)
-        abeat.point_in_song -= 0.4
+        abeat.point_in_song -= 0.4*tick_multiplier_debug
         if abeat.point_in_song < 30:
             rems.append(abeat)
     for arem in rems:
@@ -935,8 +1008,11 @@ while run == True:
                                     aplay.stun = 3
                     elif aplayer.beat_type == 3:
                         aplayer.insanity += 2
+    text = bossfont.render('tps ' + str(round(tps)),True,(0,0,0),(200,200,200))
+    screen.blit(text,(50,200))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-    pygame.display.update()
+    if timestep == True:
+        pygame.display.update()
 pygame.quit()
