@@ -73,6 +73,7 @@ class projectile(pygame.Rect):
         self.ty = top
     
     exists = True
+    passind = False
     
     def move_ip(self,deltaX:float,deltaY:float):
         self.tx = self.tx+deltaX
@@ -97,7 +98,9 @@ class projectile(pygame.Rect):
         if self.projectile_lifespan < 1:
             self.exists = False
         for aplayer in hitables:
-            if not aplayer == self.spawner:
+            if not (aplayer == self.spawner or (aplayer in summons and aplayer.origin = self.spawner)):
+                # self.passind = False
+                # if aplayer
                 if self.colliderect(aplayer):
                     deal_dammage(self.dammage,aplayer)
                     aplayer.xmom = self.initial_velocity
@@ -176,7 +179,7 @@ def deal_dammage(ammount,target):
 
 class summon(movable):
     "these are objects that can be moved and destroyed"
-    def __init__(self,back,top,width,height,health,damage,time_between_hits,ranged,attack_duration):
+    def __init__(self,back,top,width,height,health,damage,time_between_hits,ranged,attack_duration,origin):
         self.inittop = top
         self.initback = back
         self.health = health
@@ -184,11 +187,13 @@ class summon(movable):
         self.time_between_hits = time_between_hits
         self.ranged = ranged
         self.attack_duration = attack_duration
+        self.origin = origin
         super().__init__(back,top,width,height)
         self.tx = back
         self.ty = top
     abylity_type = 0
     armour = 0
+    cooldown = 0
 
 i = 0
 player_select_iterator = 0
@@ -656,7 +661,30 @@ while run == True:
         beat_indicator_right.width = 5
         beat_indicator_left.width = 5
 
+    #health,damage,time_between_hits,ranged,attack_duration,origin
 
+    for asum in summons:
+        if asum.health > 0:
+            if asum.cooldown < 0:
+                asum.cooldown = asum.time_between_hits
+                if asum.ranged = False:
+                    arrow = projectile(asum.x-30,asum.centery,asum.right - asum.x + 30,10,0,10,asum.origin,asum.damage)
+                    projectiles.append(arrow)
+                else:
+                    i = 0
+                    for aplay in player_list:
+                        if aplay.x < asum.x:
+                            i-=1
+                        else:
+                            i+=1
+                    if i > 0:
+                        i = 1
+                    else:
+                        i = -1
+                    arrow = projectile(asum.centerx,asum.centery,30,10,3*i,asum.attack_duration,asum.origin,asum.damage)
+                    projectiles.append(arrow)
+        else:
+            summons.remove(asum)
     pygame.draw.line(screen, (0,0,0), (0,(750)), (3000,(750)), 4)
     text = tutorialfont.render(str(beatspassedplayer1),True,(0,0,0),(255,255,255))
     screen.blit(text,(700,500))
@@ -676,7 +704,7 @@ while run == True:
         i+=1
     for abeat in beats:
         pygame.draw.circle(screen, abeat.color, (abeat.point_in_song, (abeat.player * 60)), 12)
-        abeat.point_in_song -= 0.4*tick_multiplier_debug
+        abeat.point_in_song -= 0.3*tick_multiplier_debug
         if abeat.point_in_song < 30:
             rems.append(abeat)
     for arem in rems:
@@ -708,6 +736,8 @@ while run == True:
                         aplayer.beat_on = True
                         abeat.rachet = False
                         aplayer.beat_ind = True
+                        for asum in summons:
+                            asum.cooldown -= 1
                         if abeat in player1.beats:
                             beatspassedplayer1 += 1
                         for aplayer in player_list:
