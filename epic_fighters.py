@@ -94,7 +94,7 @@ class projectile(movable):
         self.ty = self.inittop
         self.move(self.tx,self.ty)
     def step(self):
-        self.move_ip(self.initial_velocity*tick_multiplier_debug,0)
+        self.move_ip(self.initial_xvelocity*tick_multiplier_debug,self.initial_yvelocity*tick_multiplier_debug)
         self.projectile_lifespan-=1
         if self.projectile_lifespan < 1:
             self.exists = False
@@ -104,7 +104,7 @@ class projectile(movable):
                 # if aplayer
                 if self.colliderect(aplayer):
                     deal_dammage(self.dammage,aplayer)
-                    aplayer.xmom = self.initial_velocity
+                    aplayer.xmom = self.xinitial_velocity
                     self.exists = False
 class player(movable):
     "these are objects that can be moved and destroyed"
@@ -142,6 +142,7 @@ class player(movable):
     beat_shown = -1
     beat_ind = False
     last_key_pressed = None
+    cooldown = 0
     
     # def move_ip(self,deltaX:float,deltaY:float):
 #         self.tx = self.tx+deltaX
@@ -180,7 +181,7 @@ def deal_dammage(ammount,target):
 
 class summon(movable):
     "these are objects that can be moved and destroyed"
-    def __init__(self,back,top,width,height,health,damage,time_between_hits,ranged,attack_duration,origin):
+    def __init__(self,back,top,width,height,health,damage,time_between_hits,ranged,attack_duration,origin,speed):
         self.inittop = top
         self.initback = back
         self.health = health
@@ -671,6 +672,10 @@ while run == True:
                 if asum.ranged == False:
                     arrow = projectile(asum.x-30,asum.centery,asum.right - asum.x + 30,10,0,0,10,asum.origin,asum.damage)
                     projectiles.append(arrow)
+                    if asum in stun_towers:
+                        for aplayer in players:
+                            if (aplayer.centerx < aplayer.centerx + 100 and aplayer.centerx > aplayer.centerx - 100 and aplayer.bottom < aplayer.bottom - 100):
+                                aplayer.stun+=1
                 else:
                     i = 0
                     for aplay in player_list:
@@ -684,6 +689,7 @@ while run == True:
                         i = -1
                     arrow = projectile(asum.centerx,asum.centery,30,10,3*i,0,asum.attack_duration,asum.origin,asum.damage)
                     projectiles.append(arrow)
+                    
         else:
             summons.remove(asum)
     pygame.draw.line(screen, (0,0,0), (0,(750)), (3000,(750)), 4)
@@ -1044,22 +1050,33 @@ while run == True:
                                     aplay.stun = 3
                     elif aplayer.beat_type == 3:
                         aplayer.insanity += 2
-            elif aplayer.player_type == 2 and aplayer.beat_on == True:
+            elif aplayer.player_type == 34 and aplayer.beat_on == True:
+                if aplayer.bottom < 700 and aplayer.cooldown < 0:
+                    aplayer.cooldown = 100
+                    arrow = projectile(aplayer.centerx,aplayer.centery,10,10,random.randint(-1,1),3,200,aplayer,5)
+                    projectiles.append(arrow)
+                    if aplayer.ymom > -1:
+                        aplayer.ymom = -3
+                else:
+                    aplayer.cooldown -= 1
                 if key[aplayer.player_keybinds[0]]:
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
-                        tomb_thumb = summon(aplayer.x,730,20,60,20,5,1,False,5,aplayer)
+                        tomb_thumb = summon(aplayer.x,730,20,60,20,5,1,False,5,aplayer,5)
+                        summons.append(tomb_thumb)
                     elif aplayer.beat_type == 2:
-                        bearded_lady = summon(aplayer.x,710,50,80,50,0,1,False,0,aplayer)
+                        bearded_lady = summon(aplayer.x,710,50,80,50,0,1,False,0,aplayer,-3)
+                        summons.append(bearded_lady)
                     elif aplayer.beat_type == 3:
-                        strongman = summon(aplayer.x,700,50,90,50,20,1,False,5,aplayer)
+                        strongman = summon(aplayer.x,700,50,90,50,20,1,False,5,aplayer,4)
+                        summons.append(strongman)
                         aplayer.health-=5
                 elif key[aplayer.player_keybinds[1]]:
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
-                        
+                        print("l")
                     elif aplayer.beat_type == 2:
-
+                        print("l")
                     elif aplayer.beat_type == 3:
                         i = 0
                         for aplay in player_list:
@@ -1087,23 +1104,46 @@ while run == True:
                                 i-=1
                             else:
                                 i+=1
-                        if i > 0:
+                        if i < 0:
                             aplayer.xmom = -9
                         else:
                             aplayer.xmom = 9
                         aplayer.attack_moving_damage = 10
                     elif aplayer.beat_type == 2:
-
+                        i = 1
+                        while i < (players+1):
+                            if not player_list[i+1] == aplayer:
+                                pygame.draw.line(screen, (0,0,0), (0,(60*i)), (3000,(60*i)), 4)
+                                arrow = projectile(0,(60*i)-30,1540,60,0,0,200,aplayer,0)
+                                projectiles.append(arrow)
+                            i+=1
                     elif aplayer.beat_type == 3:
-
+                        for asum in summons:
+                            if asum.origin == aplayer:
+                                arrow = projectile(asum.centerx-asum.width*2,asum.centery-asum.height*2, asum.width * 4,asum.height*4,0,0,40,aplayer,5)
+                                projectiles.append(arrow)
                 elif key[aplayer.player_keybinds[3]]:
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
-                        
+                        aplayer.ymom = 13
                     elif aplayer.beat_type == 2:
-
+                        stun_tower = summon(aplayer.x,710,50,80,30,0,3,False,1,aplayer,0)
+                        summons.append(stun_tower)
+                        stun_towers.append(stun_tower)
                     elif aplayer.beat_type == 3:
-
+                        aplayer.ymom = -10
+                        i = 0
+                        for aplay in player_list:
+                            if aplay.x < aplayer.x:
+                                i-=1
+                            else:
+                                i+=1
+                        if i > 0:
+                            aplayer.xmom = -9
+                        else:
+                            aplayer.xmom = 9
+                        arrow = projectile(aplayer.centerx,0, 100,100,0,1,800,aplayer,30)
+                        projectiles.append(arrow)
     text = bossfont.render('tps ' + str(round(tps)),True,(0,0,0),(200,200,200))
     screen.blit(text,(50,200))
     for event in pygame.event.get():
