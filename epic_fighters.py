@@ -104,7 +104,7 @@ class projectile(movable):
                 # if aplayer
                 if self.colliderect(aplayer):
                     deal_dammage(self.dammage,aplayer)
-                    aplayer.xmom = self.xinitial_velocity
+                    aplayer.xmom = self.initial_xvelocity
                     self.exists = False
 class player(movable):
     "these are objects that can be moved and destroyed"
@@ -125,6 +125,7 @@ class player(movable):
     time_till_attck = 0
     attack_type = 0
     lost_healt_per_miss = 5
+    miss_cooldown = 0
     charge = 0
     charge_set = False
     beat_type = 0
@@ -190,12 +191,15 @@ class summon(movable):
         self.ranged = ranged
         self.attack_duration = attack_duration
         self.origin = origin
+        self.speed = speed
         super().__init__(back,top,width,height)
         self.tx = back
         self.ty = top
     abylity_type = 0
     armour = 0
     cooldown = 0
+    xmom = 0
+
 
 i = 0
 player_select_iterator = 0
@@ -417,6 +421,7 @@ rems = []
 projectiles = []
 summons = []
 hitables = []
+stun_towers = [3]
 
 while selection < 2:
     current_time = timekeep.time()
@@ -645,6 +650,8 @@ while run == True:
     pygame.draw.rect(screen, (200,0,0),beat_indicator_top)
     pygame.draw.rect(screen, (200,0,0),beat_indicator_left)
     pygame.draw.rect(screen, (200,0,0),beat_indicator_right)
+    for asum in summons:
+        pygame.draw.rect(screen, (100,100,100),asum)
     beat_indicator_bottom.move_ip(0,-1*beat_ind_vel*tick_multiplier_debug)
     beat_indicator_bottom.height = 790 - beat_indicator_bottom.y
     beat_indicator_right.move_ip(-1*beat_ind_vel*tick_multiplier_debug,0)
@@ -667,13 +674,35 @@ while run == True:
 
     for asum in summons:
         if asum.health > 0:
+            asum.move_ip(asum.xmom*tick_multiplier_debug,0)
+            if asum.xmom < -0.2*tick_multiplier_debug:
+                asum.xmom+=0.1*tick_multiplier_debug
+            elif asum.xmom > 0.2*tick_multiplier_debug:
+                asum.xmom-=0.1*tick_multiplier_debug
+            else:
+                asum.xmom = 0
+            if asum.bottom < 750:
+                asum.move_ip(0,1)
+            else:
+                asum.move(asum.x,750 - asum.height)
             if asum.cooldown < 0:
                 asum.cooldown = asum.time_between_hits
+                i = 0
+                for aplay in player_list:
+                    if not aplay == asum.origin:
+                        if aplay.x < asum.x:
+                            i-=1
+                        else:
+                            i+=1
+                if i < 0:
+                    asum.xmom = -1 * asum.speed
+                else:
+                    asum.xmom = asum.speed
                 if asum.ranged == False:
-                    arrow = projectile(asum.x-30,asum.centery,asum.right - asum.x + 30,10,0,0,10,asum.origin,asum.damage)
+                    arrow = projectile(asum.x-asum.width,asum.centery,asum.width * 3,10,0,0,10,asum.origin,asum.damage)
                     projectiles.append(arrow)
                     if asum in stun_towers:
-                        for aplayer in players:
+                        for aplayer in player_list:
                             if (aplayer.centerx < aplayer.centerx + 100 and aplayer.centerx > aplayer.centerx - 100 and aplayer.bottom < aplayer.bottom - 100):
                                 aplayer.stun+=1
                 else:
@@ -701,6 +730,9 @@ while run == True:
         screen.blit(text,(200,(60*i)-32))
         text = tutorialfont.render('player ' + str(i) + ' armour: ' + str(player_list[i-1].armour),True,(0,0,0),(255,255,255))
         screen.blit(text,(400,(60*i)-32))
+        if player_list[i - 1].miss_cooldown > 0:
+            text = tutorialfont.render('miss',True,(200,0,0),(255,255,255))
+            screen.blit(text,(600,(60*i)-32))
         # if player_list[i-1].beat_on == True:
         text = tutorialfont.render(str(player_list[i-1].beat_type),True,(0,0,0),(255,255,255))
         screen.blit(text,(700,(60*i)-32))
@@ -711,7 +743,7 @@ while run == True:
         i+=1
     for abeat in beats:
         pygame.draw.circle(screen, abeat.color, (abeat.point_in_song, (abeat.player * 60)), 12)
-        abeat.point_in_song -= 0.3*tick_multiplier_debug
+        abeat.point_in_song -= 0.2*tick_multiplier_debug
         if abeat.point_in_song < 30:
             rems.append(abeat)
     for arem in rems:
@@ -722,7 +754,7 @@ while run == True:
         i = 0
         for abeat in aplayer.beats:
             # if abeat in aplayer.beats:
-                if abeat.point_in_song < 80 and abeat.point_in_song > 40:
+                if abeat.point_in_song < 100 and abeat.point_in_song > 30:
                     if abeat.color == (200, 0, 0):
                         aplayer.beat_type = 1
                     elif abeat.color == (0, 0, 200):
@@ -783,8 +815,10 @@ while run == True:
         if aplayer.stun < 1:
             for akey in aplayer.player_keybinds:
                 if key[akey]:
-                    if aplayer.beat_type == 0:
+                    if aplayer.beat_type == 0 and aplayer.miss_cooldown < 1:
                         aplayer.health -= aplayer.lost_healt_per_miss
+                        aplayer.miss_cooldown = 30
+            aplayer.miss_cooldown -= tick_multiplier_debug
             if aplayer.beat_type == 5:
                 i = 0
                 for aplay in player_list:
@@ -1010,7 +1044,7 @@ while run == True:
                             arrow = projectile(aplayer.centerx-70,aplayer.top-10,140,aplayer.height + 10,0,0,10,aplayer,10)
                             projectiles.append(arrow)
                     elif aplayer.beat_type == 3:
-                        if aplayer.tranformed == 0:
+                        if aplayer.transformed == 0:
                             aplayer.insanity -= 10
                             aplayer.health += 10
                         else:
@@ -1024,9 +1058,6 @@ while run == True:
                             deal_dammage(5,aplayer)
                             aplayer.insanity += 10
                         else:
-                            for aplayer in player_list:
-                                if aplayer.centerx < aplayer.centerx + 80 and aplayer.centerx > aplayer.centerx - 80 and aplayer.bottom < aplayer.bottom - 40:
-                                    deal_dammage(15,aplay)
                             arrow = projectile(aplayer.centerx-80,aplayer.top-10,160,aplayer.height + 10,0,0,10,aplayer,15)
                             projectiles.append(arrow)
                             i = 0
@@ -1049,8 +1080,8 @@ while run == True:
                                     aplay.health += 10
                                     aplay.stun = 3
                     elif aplayer.beat_type == 3:
-                        aplayer.insanity += 2
-            elif aplayer.player_type == 34 and aplayer.beat_on == True:
+                        aplayer.insanity += 5
+            elif aplayer.player_type == 3 and aplayer.beat_on == True:
                 if aplayer.bottom < 700 and aplayer.cooldown < 0:
                     aplayer.cooldown = 100
                     arrow = projectile(aplayer.centerx,aplayer.centery,10,10,random.randint(-1,1),3,200,aplayer,5)
@@ -1062,13 +1093,13 @@ while run == True:
                 if key[aplayer.player_keybinds[0]]:
                     aplayer.beat_on = False
                     if aplayer.beat_type == 1:
-                        tomb_thumb = summon(aplayer.x,730,20,60,20,5,1,False,5,aplayer,5)
+                        tomb_thumb = summon(aplayer.x,680,20,60,20,5,1,False,5,aplayer,5)
                         summons.append(tomb_thumb)
                     elif aplayer.beat_type == 2:
-                        bearded_lady = summon(aplayer.x,710,50,80,50,0,1,False,0,aplayer,-3)
+                        bearded_lady = summon(aplayer.x,660,50,80,50,0,1,False,0,aplayer,-3)
                         summons.append(bearded_lady)
                     elif aplayer.beat_type == 3:
-                        strongman = summon(aplayer.x,700,50,90,50,20,1,False,5,aplayer,4)
+                        strongman = summon(aplayer.x,650,50,90,50,20,1,False,5,aplayer,4)
                         summons.append(strongman)
                         aplayer.health-=5
                 elif key[aplayer.player_keybinds[1]]:
@@ -1110,10 +1141,9 @@ while run == True:
                             aplayer.xmom = 9
                         aplayer.attack_moving_damage = 10
                     elif aplayer.beat_type == 2:
-                        i = 1
-                        while i < (players+1):
-                            if not player_list[i+1] == aplayer:
-                                pygame.draw.line(screen, (0,0,0), (0,(60*i)), (3000,(60*i)), 4)
+                        i = 0
+                        while i < (players):
+                            if not player_list[i] == aplayer:
                                 arrow = projectile(0,(60*i)-30,1540,60,0,0,200,aplayer,0)
                                 projectiles.append(arrow)
                             i+=1
@@ -1127,7 +1157,7 @@ while run == True:
                     if aplayer.beat_type == 1:
                         aplayer.ymom = 13
                     elif aplayer.beat_type == 2:
-                        stun_tower = summon(aplayer.x,710,50,80,30,0,3,False,1,aplayer,0)
+                        stun_tower = summon(aplayer.x,660,50,80,30,0,3,False,1,aplayer,0)
                         summons.append(stun_tower)
                         stun_towers.append(stun_tower)
                     elif aplayer.beat_type == 3:
