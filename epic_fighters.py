@@ -59,6 +59,7 @@ class beat():
         self.player = player
         pass
     rachet = True
+    ind_point = 0
 class projectile(movable):
     "these are objects that can be moved and destroyed"
     def __init__(self,back,top,width,height,xvelocity,yvelocity,lifetime,origin,damage):
@@ -103,9 +104,11 @@ class projectile(movable):
                 # self.passind = False
                 # if aplayer
                 if self.colliderect(aplayer):
-                    deal_dammage(self.dammage,aplayer)
-                    aplayer.xmom = self.initial_xvelocity
+                    deal_dammage(self.dammage,aplayer,self)
+                    # aplayer.xmom = self.initial_xvelocity
                     self.exists = False
+                    if self in trapped_arrows:
+                        bullet_trap(aplayer,self.spawner)
 class player(movable):
     "these are objects that can be moved and destroyed"
     def __init__(self,back,top,width,height,type,keys):
@@ -144,6 +147,9 @@ class player(movable):
     beat_ind = False
     last_key_pressed = None
     cooldown = 0
+    misswordsize = 100
+    misswordsizechangespeed = 0
+
     
     # def move_ip(self,deltaX:float,deltaY:float):
 #         self.tx = self.tx+deltaX
@@ -174,12 +180,20 @@ def truant(stagnum,stagplay):
         i +=1
         beats.remove(stagplay.beats[i*2])
         stagplay.beats.remove(stagplay.beats[i*2])
-def deal_dammage(ammount,target):
+def deal_dammage(ammount,target,origin):
+    if target.health > 0:
+        if target.centerx > origin.centerx:
+            target.xmom = round(ammount/3)
+            target.ymom = -1*round(ammount/3)
+            print("knock")
+        elif target.centerx < origin.centerx:
+            target.xmom = -1*round(ammount/3)
+            target.ymom = -1*round(ammount/3)
+            print("knock")
     if target.armour > 1:
         target.armour -= ammount * target.multiply[0]
     else:
         target.health -= ammount * target.multiply[0]
-
 class summon(movable):
     "these are objects that can be moved and destroyed"
     def __init__(self,back,top,width,height,health,damage,time_between_hits,ranged,attack_duration,origin,speed):
@@ -212,6 +226,17 @@ titlewordsizechangespeed = 0
 title_word_color = (0,0,0)
 title_word_color_randomizer = 0
 beatspassedplayer1 = 0
+def bullet_trap(target,origin):
+    arrow = projectile(target.centerx - 300, target.centery, 10, 10, 1, 0, 600, origin, 5)
+    projectiles.append(arrow)
+    arrow = projectile(target.centerx + 300, target.centery, 10, 10, -1, 0, 600, origin, 5)
+    projectiles.append(arrow)
+    arrow = projectile(target.centerx, target.centery - 300, 10, 10, 0, 1, 600, origin, 5)
+    projectiles.append(arrow)
+    arrow = projectile(target.centerx + 300, target.centery - 300, 10, 10, -1, 1, 600, origin, 5)
+    projectiles.append(arrow)
+    arrow = projectile(target.centerx - 300, target.centery - 300, 10, 10, 1, 1, 600, origin, 5)
+    projectiles.append(arrow)
 player1 = player(100,1808,64,128,None,[pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4])
 player2 = player(100,1808,64,128,None,[pygame.K_z,pygame.K_x,pygame.K_c,pygame.K_v])
 player3 = player(100,1808,64,128,None,[pygame.K_7,pygame.K_8,pygame.K_9,pygame.K_0])
@@ -421,7 +446,8 @@ rems = []
 projectiles = []
 summons = []
 hitables = []
-stun_towers = [3]
+stun_towers = []
+trapped_arrows = []
 
 while selection < 2:
     current_time = timekeep.time()
@@ -609,7 +635,7 @@ while run == True:
             for aplayer in player_list:
                 if not aplayer == aplay:
                     if aplay.colliderect(aplayer):
-                        aplayer.health -= aplay.attack_moving_damage
+                        deal_dammage(aplay.attack_moving_damage,aplayer,aplay)
                         aplay.xmom *= -0.3
                         aplay.attack_moving_damage = 0
         if aplay.xmom < -0.2*tick_multiplier_debug:
@@ -630,8 +656,6 @@ while run == True:
         if aplay.right > 1540:
             aplay.xmom *= -1
             aplay.move(1540 - aplay.width,aplay.y)
-    if player2.beat_on == True:
-        print("good")
     for aproj in projectiles:
         pygame.draw.rect(screen, (0,0,0), aproj)
         if aproj.exists == False:
@@ -731,10 +755,12 @@ while run == True:
         text = tutorialfont.render('player ' + str(i) + ' armour: ' + str(player_list[i-1].armour),True,(0,0,0),(255,255,255))
         screen.blit(text,(400,(60*i)-32))
         if player_list[i - 1].miss_cooldown > 0:
-            text = tutorialfont.render('miss',True,(200,0,0),(255,255,255))
-            screen.blit(text,(600,(60*i)-32))
+            text = pygame.font.SysFont(None,round(aplayer.misswordsize)).render(('miss'),True,(255,0,0),(255,255,255))
+            screen.blit(text,(600 - round(aplayer.misswordsize/2), (60*i) - 32 - round(aplayer.misswordsize/4)))
+            aplayer.misswordsize += aplayer.misswordsizechangespeed*tick_multiplier_debug
+            aplayer.misswordsizechangespeed -= 0.1*tick_multiplier_debug
         # if player_list[i-1].beat_on == True:
-        text = tutorialfont.render(str(player_list[i-1].beat_type),True,(0,0,0),(255,255,255))
+        text = tutorialfont.render(str(player_list[i-1].beat_type),True,(0,0,0),(255,255,255)) 
         screen.blit(text,(700,(60*i)-32))
         pygame.draw.line(screen, (0,0,0), (0,(60*i)), (3000,(60*i)), 4)
         if player_list[i-1].beat_shown < 0:
@@ -754,7 +780,7 @@ while run == True:
         i = 0
         for abeat in aplayer.beats:
             # if abeat in aplayer.beats:
-                if abeat.point_in_song < 100 and abeat.point_in_song > 30:
+                if abeat.point_in_song < 90 and abeat.point_in_song > 40:
                     if abeat.color == (200, 0, 0):
                         aplayer.beat_type = 1
                     elif abeat.color == (0, 0, 200):
@@ -768,9 +794,12 @@ while run == True:
                     elif abeat.color == (100, 0, 200):
                         aplayer.beat_type = 6
                     if aplayer.beat_ind == True:
-                        pygame.draw.circle(screen, abeat.color, (abeat.point_in_song, (abeat.player * 60)), round(12 + (abeat.point_in_song - 50)/3))
-                        if abeat.point_in_song < 40:
-                            aplayer.beat_ind = False
+                        if key[aplayer.player_keybinds[0]] or key[aplayer.player_keybinds[1]] or key[aplayer.player_keybinds[2]] or key[aplayer.player_keybinds[3]] and aplayer.beat_on == True:
+                            abeat.ind_point = abeat.point_in_song
+                        if not abeat.ind_point == 0:
+                            pygame.draw.circle(screen, abeat.color, (abeat.point_in_song, (abeat.player * 60)), round(12 + (abeat.point_in_song - 50)/3))
+                        # if abeat.point_in_song < 40:
+                            # aplayer.beat_ind = False
                     if abeat.rachet == True:
                         aplayer.beat_on = True
                         abeat.rachet = False
@@ -812,12 +841,24 @@ while run == True:
     # if aplayer.beat_count == len(aplayer.beats):
     #     aplayer.beat_type = 0
     for aplayer in player_list:
-        if aplayer.stun < 1:
+        if key[aplayer.player_keybinds[0]] and key[aplayer.player_keybinds[1]] and aplayer.beat_on == True:
+            aplayer.beat_on = False
+            aplayer.xmom = -8
+        elif key[aplayer.player_keybinds[2]] and key[aplayer.player_keybinds[3]] and aplayer.beat_on == True:
+            aplayer.beat_on = False
+            aplayer.xmom = 8
+        elif key[aplayer.player_keybinds[2]] and key[aplayer.player_keybinds[1]] and aplayer.beat_on == True:
+            aplayer.beat_on = False
+            aplayer.ymom = -9
+        elif aplayer.stun < 1:
             for akey in aplayer.player_keybinds:
                 if key[akey]:
                     if aplayer.beat_type == 0 and aplayer.miss_cooldown < 1:
                         aplayer.health -= aplayer.lost_healt_per_miss
                         aplayer.miss_cooldown = 30
+                        aplayer.misswordsize = 60
+                        aplayer.misswordsizechangespeed = 2
+            
             aplayer.miss_cooldown -= tick_multiplier_debug
             if aplayer.beat_type == 5:
                 i = 0
@@ -835,7 +876,7 @@ while run == True:
                     aplayer.xmom = 8
                 else:
                     aplayer.xmom = -8
-                deal_dammage(5,aplayer)
+                deal_dammage(5,aplayer,aplayer)
                 arrow = projectile(aplayer.centerx-100,aplayer.top-10,200,aplayer.height + 10,0,0,10,aplayer,30)
                 projectiles.append(arrow)
             if aplayer.player_type == 1 and aplayer.beat_on == True:
@@ -951,7 +992,6 @@ while run == True:
                         arrow = projectile(aplayer.centerx-50,aplayer.centery,100,10,0,0,10,aplayer,0)
                         projectiles.append(arrow)
             elif aplayer.player_type == 2 and aplayer.beat_on == True:
-                print("yum")
                 if aplayer.insanity > 30:
                     aplayer.depravity+=1
                     aplayer.insanity = 0
@@ -988,7 +1028,7 @@ while run == True:
                                     aplay.multiply = [2,3]
                     elif aplayer.beat_type == 3:
                         if aplayer.transformed == 0:
-                            deal_dammage(aplayer.insanity,aplayer)
+                            deal_dammage(aplayer.insanity,aplayer,aplayer)
                             for aplay in player_list:
                                 if aplay.centerx < aplayer.centerx + 50 and aplay.centerx > aplayer.centerx - 50 and aplay.bottom < aplayer.bottom - 40:
                                     aplay.stun = aplayer.depravity
@@ -1020,7 +1060,7 @@ while run == True:
                             aplayer.beats[1].color = (100,0,200)
                             aplayer.beats[2].color = (100,0,200)
                     elif aplayer.beat_type == 3:
-                        deal_dammage(aplayer.insanity,aplayer)
+                        deal_dammage(aplayer.insanity,aplayer,aplayer)
                         aplayer.healing = [2,aplayer.insanity]
                 elif key[aplayer.player_keybinds[2]]:
                     aplayer.beat_on = False
@@ -1029,7 +1069,7 @@ while run == True:
                         for aplay in player_list:
                             if not aplay == aplayer:
                                 if aplayer.transformed == 0:
-                                    deal_dammage(5,aplay)
+                                    deal_dammage(5,aplay,aplayer)
                                 else:
                                     stagger(1,aplay)
                     elif aplayer.beat_type == 2:
@@ -1048,14 +1088,14 @@ while run == True:
                             aplayer.insanity -= 10
                             aplayer.health += 10
                         else:
-                            deal_dammage(5,aplayer)
+                            deal_dammage(5,aplayer,aplayer)
                             aplayer.insanity += 10
                 if key[aplayer.player_keybinds[3]]:
                     aplayer.beat_on = False
                     aplayer.insanity += aplayer.depravity
                     if aplayer.beat_type == 1:
                         if aplayer.transformed == 0:
-                            deal_dammage(5,aplayer)
+                            deal_dammage(5,aplayer,aplayer)
                             aplayer.insanity += 10
                         else:
                             arrow = projectile(aplayer.centerx-80,aplayer.top-10,160,aplayer.height + 10,0,0,10,aplayer,15)
@@ -1072,7 +1112,7 @@ while run == True:
                                 aplayer.xmom = -7
                     elif aplayer.beat_type == 2:
                         if aplayer.transformed == 0:
-                            deal_dammage(15,aplayer)
+                            deal_dammage(15,aplayer,aplayer)
                             aplayer.depravity += 1
                         else:
                             for aplayer in player_list:
@@ -1107,7 +1147,19 @@ while run == True:
                     if aplayer.beat_type == 1:
                         print("l")
                     elif aplayer.beat_type == 2:
-                        print("l")
+                        i = 0
+                        for aplay in player_list:
+                            if aplay.x < aplayer.x:
+                                i-=1
+                            else:
+                                i+=1
+                        if i > 0:
+                            i = 1
+                        else:
+                            i = -1
+                        arrow = projectile(aplayer.centerx,aplayer.centery,30,10,2*i,0,400,aplayer,0)
+                        projectiles.append(arrow)
+                        trapped_arrows.append(arrow)
                     elif aplayer.beat_type == 3:
                         i = 0
                         for aplay in player_list:
